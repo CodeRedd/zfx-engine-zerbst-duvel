@@ -80,7 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ZFXRenderer.h" />
-    <ClInclude Include="ZFXRendererDevice.h" />
+    <ClInclude Include="ZFXRenderDevice.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
