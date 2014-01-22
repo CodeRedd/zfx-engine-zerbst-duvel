@@ -15,19 +15,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="ZFXRenderer.cpp">
+    <ClCompile Include="ZFXD3D_init.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ZFXD3D_enum.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ZFXD3D_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ZFXRenderer.h">
+    <ClInclude Include="ZFXD3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ZFXRendererDevice.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ZFXD3D.def">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
