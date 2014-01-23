@@ -2,6 +2,9 @@
 //Created by Stefan Zerbst and Oliver Duvel
 //Reimplemented by Culver Redd
 
+#include <Windows.h> //needed for many functions and macros
+#include <cstdio>	//needed for the FILE struct
+
 #define MAX_3DHWND 8
 
 //Interface for the ZFX Engine 2.0 renderer. Makes the Renderer itself graphics-API-agnostic (Zerbst and Duvel use Direct3D, though, and I will as well)
@@ -11,7 +14,7 @@ class ZFXRenderDevice
 	//the derived classes don't have a boatload of attributes
 	protected:
 		HWND		m_hWndMain;			//main window
-		HWND		m_hWnd[MAX3DHWND];	//render window(s)
+		HWND		m_hWnd[MAX_3DHWND];	//render window(s)
 		UINT		m_nNumWnd;			//number of render windows
 		UINT		m_nActivehWnd;		//active window
 		HINSTANCE	m_hDLL;				//DLL Module
@@ -19,7 +22,7 @@ class ZFXRenderDevice
 		DWORD		m_dwHeight;			//screen height
 		bool		m_bWindowed;		//windowed mode?
 		char		m_chAdapter[256];	//graphics adapter name
-		FILE		*m_pLog;			//log file
+		FILE	*m_pLog;			//log file
 		bool		m_bRunning;			//Is the renderer running?
 
 	public:
