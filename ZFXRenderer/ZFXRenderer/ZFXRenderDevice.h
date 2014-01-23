@@ -1,6 +1,7 @@
 //File: ZFXRenderDevice.h
 //Created by Stefan Zerbst and Oliver Duvel
 //Reimplemented by Culver Redd
+
 #define MAX_3DHWND 8
 
 //Interface for the ZFX Engine 2.0 renderer. Makes the Renderer itself graphics-API-agnostic (Zerbst and Duvel use Direct3D, though, and I will as well)
@@ -40,3 +41,17 @@ class ZFXRenderDevice
 		virtual void SetClearColor(float fRed, float fGreen, float fBlue)=0;
 	};
 typedef struct ZFXRenderDevice *LPZFXRENDERDEVICE;
+
+//create some macros for utility functions that should exist outside the RenderDevice interface
+//These allow us to get a pointer to something implementing ZFXRenderDevice (in the DLL) from outside the library. So this is what actually lets us use the stuff we're writing!
+//"Extern C" exports the functions as C code to reduce overhead of C++. Exporting as C++ would also force modification of names and parameter lists that we don't want to deal with.
+extern "C"
+{
+	HRESULT CreateRenderDevice(HINSTANCE hDLL, ZFXRenderDevice **pInterface);
+
+	typedef HRESULT(*CREATERENDERDEVICE) (HINSTANCE hDLL, ZFXRenderDevice**pInterface);
+
+	HRESULT ReleaseRenderDevice(ZFXRenderDevice **pInterface);
+
+	typedef HRESULT(*RELEASERENDERDEVICE) (ZFXRenderDevice **pInterface);
+}
