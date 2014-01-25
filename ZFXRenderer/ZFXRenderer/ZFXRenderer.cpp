@@ -67,6 +67,7 @@ HRESULT ZFXRenderer::CreateDevice(char *chAPI)
 	return S_OK;
 }
 
+//Releases the object that implements the RenderDevice interface
 void ZFXRenderer::Release()
 {
 	RELEASERENDERDEVICE _ReleaseRenderDevice = 0;
