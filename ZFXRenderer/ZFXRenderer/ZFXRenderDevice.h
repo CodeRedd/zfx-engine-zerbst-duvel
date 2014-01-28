@@ -21,7 +21,7 @@ class ZFXRenderDevice
 		DWORD		m_dwWidth;			//screen width
 		DWORD		m_dwHeight;			//screen height
 		bool		m_bWindowed;		//windowed mode?
-		char		m_chAdapter[256];	//graphics adapter name
+		wchar_t		m_chAdapter[256];	//graphics adapter name
 		FILE	*m_pLog;			//log file
 		bool		m_bRunning;			//Is the renderer running?
 
@@ -45,16 +45,13 @@ class ZFXRenderDevice
 	};
 typedef struct ZFXRenderDevice *LPZFXRENDERDEVICE;
 
-//create some macros for utility functions that should exist outside the RenderDevice interface
-//These allow us to get a pointer to something implementing ZFXRenderDevice (in the DLL) from outside the library. So this is what actually lets us use the stuff we're writing!
+
+//Normally, the utility functions allowing us to get a pointer to the implementation of ZFXRenderDevice would have a declaration here as well, but
+//the .def file used to accomplish this is deprecated as of VC++ 7.0+, so they have been moved to ZFXD3D_export.h in the ZFXD3D project
 //"Extern C" exports the functions as C code to reduce overhead of C++. Exporting as C++ would also force modification of names and parameter lists that we don't want to deal with.
 extern "C"
 {
-	HRESULT CreateRenderDevice(HINSTANCE hDLL, ZFXRenderDevice **pInterface);
-
 	typedef HRESULT(*CREATERENDERDEVICE) (HINSTANCE hDLL, ZFXRenderDevice**pInterface);
-
-	HRESULT ReleaseRenderDevice(ZFXRenderDevice **pInterface);
 
 	typedef HRESULT(*RELEASERENDERDEVICE) (ZFXRenderDevice **pInterface);
 }

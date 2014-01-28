@@ -11,7 +11,50 @@
 
 #include "../ZFXRenderer/ZFXRenderDevice.h"
 
-#define MAX_3DHWND 8
+
+//creates some macros for utility functions that should exist outside the RenderDevice interface
+//These allow us to get a pointer to something implementing ZFXRenderDevice (in the DLL) from outside the library. So this is what actually lets us use the stuff we're writing!
+//"Extern C" exports the functions as C code to reduce overhead of C++. Exporting as C++ would also force modification of names and parameter lists that we don't want to deal with.
+//__declspec(dllexport) is what marks these declarations as exported functions
+
+extern "C"				__declspec(dllexport) HRESULT CreateRenderDevice(HINSTANCE hDLL, ZFXRenderDevice **pInterface);
+extern "C"				__declspec(dllexport) HRESULT ReleaseRenderDevice(ZFXRenderDevice **pInterface);
+
+// one for each AdapterFormat-BackbufferFormat-WindowMode
+// (windowed or fullscreen) combination that is valid
+struct ZFXCOMBOINFO {
+	UINT       nAdapter;             // belongs to
+	D3DDEVTYPE d3dDevType;           // HAL, SW, REF
+	bool       bWindowed;            // windowed mode
+
+	D3DFORMAT  fmtAdapter;           // pixelbuffer
+	D3DFORMAT  fmtBackBuffer;        // backbuffer
+	D3DFORMAT  fmtDepthStencil;      // z/stencil format
+
+	DWORD      dwBehavior;           // vertex processing
+	D3DMULTISAMPLE_TYPE msType;      // multisample type
+};
+/*----------------------------------------------------------------*/
+
+// up to three for each adapter
+struct ZFXDEVICEINFO {
+	UINT         nAdapter;        // belongs to
+	D3DDEVTYPE   d3dDevType;      // HAL, SW, REF
+	D3DCAPS9     d3dCaps;         // capabilites
+	ZFXCOMBOINFO d3dCombo[80];    // combo
+	UINT         nNumCombo;       // number of combos
+};
+/*----------------------------------------------------------------*/
+
+struct ZFXADAPTERINFO {
+	D3DADAPTER_IDENTIFIER9 d3dAdapterIdentifier;
+	UINT                   nAdapter;         // which one
+	D3DDISPLAYMODE         d3ddspmd[150];    // display modes
+	UINT                   nNumModes;        // number of modes
+	ZFXDEVICEINFO          d3dDevs[3];       // list of devices
+	UINT                   nNumDevs;         // number of devices
+};
+/*----------------------------------------------------------------*/
 
 // enumeration stuff
 class ZFXD3DEnum {
@@ -70,6 +113,8 @@ private:
 	bool    ConfirmDepthFmt(ZFXCOMBOINFO*);
 
 };
+
+#define MAX_3DHWND 8
 
 class ZFXD3D : public ZFXRenderDevice
 {

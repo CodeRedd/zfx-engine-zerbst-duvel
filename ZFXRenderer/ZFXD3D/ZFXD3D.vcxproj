@@ -156,10 +156,15 @@
     <ClCompile Include="ZFXD3D_main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="ZFX.h" />
     <ClInclude Include="ZFXD3D.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ZFXD3D.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="dlgChangeDevice.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
