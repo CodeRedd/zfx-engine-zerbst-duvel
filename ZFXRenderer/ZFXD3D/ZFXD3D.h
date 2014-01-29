@@ -112,6 +112,16 @@ private:
 	HRESULT ConfirmDevice(D3DCAPS9*, DWORD, D3DFORMAT);
 	bool    ConfirmDepthFmt(ZFXCOMBOINFO*);
 
+	//helper functions
+	void	AddItem(HWND hWnd, TCHAR *ch, void *pData);
+	void*	GetSelectedItem(HWND hWnd);
+	bool	ContainsString(HWND hWnd, TCHAR *ch);
+	TCHAR*	D3DDevTypeToString(D3DDEVTYPE devType);
+	TCHAR*	D3DFormatToString(D3DFORMAT format);
+	TCHAR*	BehaviorTypeToString(DWORD vpt);
+
+
+
 };
 
 #define MAX_3DHWND 8

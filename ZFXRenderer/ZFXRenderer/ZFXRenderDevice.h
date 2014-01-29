@@ -21,7 +21,7 @@ class ZFXRenderDevice
 		DWORD		m_dwWidth;			//screen width
 		DWORD		m_dwHeight;			//screen height
 		bool		m_bWindowed;		//windowed mode?
-		wchar_t		m_chAdapter[256];	//graphics adapter name
+		TCHAR		m_chAdapter[256];	//graphics adapter name
 		FILE	*m_pLog;			//log file
 		bool		m_bRunning;			//Is the renderer running?
 

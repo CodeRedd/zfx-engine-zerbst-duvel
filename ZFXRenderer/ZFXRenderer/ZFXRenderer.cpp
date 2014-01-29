@@ -3,7 +3,7 @@
 //Reimplemented by Culver Redd
 #include "ZFXRenderer.h"
 
-//C++ Learning note: all of the strings used for WinAPI functions have an L in front of them because these functions take wchar_t (wide character) arrays rather than standard char*
+//C++ Learning note: all of the strings used for WinAPI functions have an L in front of them because these functions take TCHAR (Unicode-supporting version of wide character) arrays rather than standard char*
 
 //Construct and destruct
 ZFXRenderer::ZFXRenderer(HINSTANCE hInst)
@@ -22,7 +22,7 @@ ZFXRenderer::~ZFXRenderer()
 //@param *chAPI - the name identifying the DLL to be referenced
 HRESULT ZFXRenderer::CreateDevice(char *chAPI)
 {
-	wchar_t buffer[300];
+	TCHAR buffer[300];
 
 	//covers case where we want to load Direct3D Library
 	if (strcmp(chAPI, "Direct3D") == 0)
