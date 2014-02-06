@@ -7,7 +7,7 @@
 //I am distributing via GNU GPLv3--see License.txt for details.
 
 #include <Windows.h>
-#include <d3d9.h>
+#include <D3D9.h>
 
 #include "../ZFXRenderer/ZFXRenderDevice.h"
 
@@ -136,18 +136,20 @@ public:
 
 	//Initialize
 	HRESULT Init(HWND, const HWND*, int, int, int, bool);
+	HRESULT InitWindowed(HWND, const HWND*, int, bool);
 
 	//Pathway for graphics options UI to access DLL functions 
 	BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
-
+	
 	//Interface functions
 	void	Release();
-	bool	IsRunning() { return m_bIsRunning; }
+	bool	IsRunning() { return m_bIsSceneRunning; }
 	HRESULT BeginRendering(bool, bool, bool);
 	HRESULT Clear(bool, bool, bool);
 	void	EndRendering();
 	void	SetClearColor(float, float, float);
 	HRESULT	UseWindow(UINT nHwnd);
+
 
 private:
 	ZFXD3DEnum				*m_pEnum;
@@ -157,14 +159,14 @@ private:
 												  // level editor, etc.
 	D3DPRESENT_PARAMETERS	m_d3dpp;
 	D3DCOLOR				m_ClearColor;
-	bool					m_bIsRunning;
+	bool					m_bIsSceneRunning;
 	bool					m_bStencil;
 
 	//Start the API
 	HRESULT Go();
 
 	//System logging function
-	void Log(char *, ...);
+	void Log(TCHAR *, ...);
 };
 
 

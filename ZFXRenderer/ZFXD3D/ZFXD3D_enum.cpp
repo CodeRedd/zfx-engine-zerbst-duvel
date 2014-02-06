@@ -137,19 +137,19 @@ HRESULT ZFXD3DEnum::Enum(HWND hAdapter, HWND hMode,
 /**
 * Three helper function for combobox-convenience.
 */
-void* GetSelectedItem(HWND hWnd) {
+void* ZFXD3DEnum::GetSelectedItem(HWND hWnd) {
 	WPARAM nI = (WPARAM)((int)(DWORD)SendMessage(hWnd, CB_GETCURSEL, 0, 0));
 	return ((void*)SendMessage(hWnd, CB_GETITEMDATA, nI, 0));
 }
 /*----------------------------------------------------------------*/
 
-void AddItem(HWND hWnd, TCHAR *ch, void *pData) {
+void ZFXD3DEnum::AddItem(HWND hWnd, TCHAR *ch, void *pData) {
 	WPARAM nI = (WPARAM)((int)(DWORD)SendMessage(hWnd, CB_ADDSTRING, 0, (LPARAM)ch));
 	SendMessage(hWnd, CB_SETITEMDATA, nI, (LPARAM)pData);
 }
 /*----------------------------------------------------------------*/
 
-bool ContainsString(HWND hWnd, TCHAR *ch) {
+bool ZFXD3DEnum::ContainsString(HWND hWnd, TCHAR *ch) {
 	int n = (int)SendMessage(hWnd, CB_GETCOUNT, 0, 0);
 	TCHAR buffer[200];
 
@@ -682,7 +682,7 @@ UINT ZFXD3DEnum::GetBits(D3DFORMAT fmt) {
 /*----------------------------------------------------------------*/
 
 
-TCHAR* D3DDevTypeToString(D3DDEVTYPE devType) {
+TCHAR* ZFXD3DEnum::D3DDevTypeToString(D3DDEVTYPE devType) {
 	switch (devType) {
 	case D3DDEVTYPE_HAL:    return TEXT("D3DDEVTYPE_HAL");
 	case D3DDEVTYPE_SW:     return TEXT("D3DDEVTYPE_SW");
@@ -693,7 +693,7 @@ TCHAR* D3DDevTypeToString(D3DDEVTYPE devType) {
 /*----------------------------------------------------------------*/
 
 
-TCHAR* D3DFormatToString(D3DFORMAT format) {
+TCHAR* ZFXD3DEnum::D3DFormatToString(D3DFORMAT format) {
 	switch (format) {
 	case D3DFMT_UNKNOWN:         return TEXT("D3DFMT_UNKNOWN");
 	case D3DFMT_R8G8B8:          return TEXT("D3DFMT_R8G8B8");
@@ -723,7 +723,7 @@ TCHAR* D3DFormatToString(D3DFORMAT format) {
 /*----------------------------------------------------------------*/
 
 
-TCHAR* BehaviorTypeToString(DWORD vpt) {
+TCHAR* ZFXD3DEnum::BehaviorTypeToString(DWORD vpt) {
 	switch (vpt) {
 	case D3DCREATE_SOFTWARE_VERTEXPROCESSING: return TEXT("SOFTWARE_VP");
 	case D3DCREATE_MIXED_VERTEXPROCESSING:    return TEXT("MIXED_VP");
