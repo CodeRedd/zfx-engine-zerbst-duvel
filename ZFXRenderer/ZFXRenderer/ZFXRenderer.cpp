@@ -20,12 +20,12 @@ ZFXRenderer::~ZFXRenderer()
 
 //Create an object implementing the RenderDevice interface
 //@param *chAPI - the name identifying the DLL to be referenced
-HRESULT ZFXRenderer::CreateDevice(char *chAPI)
+HRESULT ZFXRenderer::CreateDevice(TCHAR *chAPI)
 {
 	TCHAR buffer[300];
 
 	//covers case where we want to load Direct3D Library
-	if (strcmp(chAPI, "Direct3D") == 0)
+	if (wcscmp(chAPI, L"Direct3D") == 0)
 	{
 		//this function does the actual DLL load (making sure it isn't loaded already) and sends back the handle for the DLL
 		m_hDLL = LoadLibrary(L"ZFXD3D.dll");

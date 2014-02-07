@@ -270,13 +270,14 @@ HRESULT ZFXD3D::Init(HWND hWnd, const HWND *hWnd3D, int nNumhWnd, int nMinDepth,
 {
 	int nResult;
 
-	FILE** pLog = NULL;
+	FILE** pLog = &m_pLog;
 	fopen_s(pLog, "log_renderdevice.txt", "w");
 	if (!pLog)
 	{
 		return ZFX_FAIL;
 	}
 	m_pLog = *pLog;
+
 
 	//should I use child windows??
 	if (nNumhWnd > 0)
