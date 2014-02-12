@@ -6,6 +6,7 @@
 //Google Code implementation by contealucard
 //I am distributing via GNU GPLv3--see License.txt for details.
 
+#include "atlconv.h"
 #include "resource.h"      // control id's
 #include "ZFX.h"           // return values and stuff
 #include "ZFXD3D.h"        // class definition
@@ -108,17 +109,15 @@ HRESULT ZFXD3DEnum::Enum(HWND hAdapter, HWND hMode,
 
 	// list the found graphics adapter
 	SendMessage(m_hADAPTER, CB_RESETCONTENT, 0, 0);
-	
-	// create a temp variable so we can convert to tchar
-	TCHAR t_descr[512]; //512 is the size of the D3DADAPTER_IDENTIFIER9's Description property
-	for (UINT a = 0; a<m_dwNumAdapters; a++) {
-		mbstowcs_s(NULL, t_descr, sizeof(t_descr), m_xAdapterInfo[a].d3dAdapterIdentifier.Description, 
-			_TRUNCATE); //_TRUNCATE will place as much of the char* into the TCHAR* as will fit
-		AddItem(m_hADAPTER, t_descr, &m_xAdapterInfo[a]);
-	}
-	//don't need this temp variable anymore
-	delete t_descr;
 
+	// create a temp variable so we can use tchar instead of char
+	TCHAR* w_description = 0;
+	for (UINT a = 0; a<m_dwNumAdapters; a++) {
+		USES_CONVERSION;
+		w_description = A2W(m_xAdapterInfo[a].d3dAdapterIdentifier.Description);
+		AddItem(m_hADAPTER,w_description, &m_xAdapterInfo[a]);
+	}
+	
 	// treat enum like adapter change
 	SendMessage(m_hADAPTER, CB_SETCURSEL, (WPARAM)0, 0);
 	ChangedAdapter();
