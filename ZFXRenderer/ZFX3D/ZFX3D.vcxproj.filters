@@ -26,5 +26,11 @@
     <ClCompile Include="ZFX3D_CPU.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ZFX3D_vector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ZFX3D_matrix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -81,6 +81,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZFX3D_CPU.cpp" />
+    <ClCompile Include="ZFX3D_matrix.cpp" />
+    <ClCompile Include="ZFX3D_vector.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
