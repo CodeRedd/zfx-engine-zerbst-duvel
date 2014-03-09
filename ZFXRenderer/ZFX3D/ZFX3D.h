@@ -5,6 +5,17 @@
 #include <Windows.h>
 #include <math.h>
 
+//definitions
+#define ZFXFRONT	0
+#define ZFXBACK		1
+#define ZFXPLANAR	2
+#define ZFXCLIPPED  3
+#define ZFXCULLED   4
+#define ZFXVISIBLE  5
+
+//Utility method
+float _fabs(float f);
+
 //CPU Info Stuff
 typedef struct CPUINFO_TYPE {
 	bool bSSE;			//Streaming SIMD Extensions
@@ -26,6 +37,11 @@ bool ZFX3DInitCPU();
 //Forward Declarations
 class ZFXVector;
 class ZFXMatrix;
+class ZFXRay;
+class ZFXPlane;
+class ZFXAABB;
+class ZFXOBB;
+class ZFXPolygon;
 class ZFXQuat;
 
 //4 Dimensional Vector Class
@@ -101,4 +117,107 @@ public:
 
 	ZFXMatrix operator * (const ZFXMatrix &m)  const;
 	ZFXVector operator * (const ZFXVector &vc) const;
+};
+
+//Infinite-length ray and finite-length line segment
+class __declspec(dllexport) ZFXRay
+{
+public:
+	ZFXVector m_vcOrig, //origin
+			  m_vcDir;  //direction
+
+	ZFXRay() { ; }
+
+	inline void Set(ZFXVector vcOrig, ZFXVector vcDir);
+	inline void DeTransform(const ZFXMatrix &_m);
+
+	//intersecting triangles
+	bool Intersects(const ZFXVector &vc0, const ZFXVector &vc1, const ZFXVector &vc2, bool bCull, float *t, float fL = -1);
+
+	//intersecting planes
+	bool Intersects(const ZFXPlane &plane, bool bCull, float *t, ZFXVector *vcHit, float fL = -1);
+
+	//intersecting AA Bounding Box
+	bool Intersects(const ZFXAABB &aabb, ZFXVector *vcHit);
+
+	//intersecting O Bounding Box
+	bool Intersects(const ZFXOBB &obb, float *t, float fL = -1);
+};
+
+//Infinite-extent plane
+class __declspec(dllexport) ZFXPlane
+{
+public:
+	ZFXVector m_vcN,	//normal vector
+			  m_vcPoint;//point on the plane
+	float	  m_fD;		//distance from origin
+
+	ZFXPlane() { ; }
+
+	inline void Set(const ZFXVector &vcN, const ZFXVector &vcPoint);
+	inline void Set(const ZFXVector &vcN, const ZFXVector &vcPoint, float fD);
+	inline void Set(const ZFXVector &vc0, const ZFXVector &vc1, const ZFXVector &vc2);
+
+	//distance of a point to the plane
+	inline float Distance(const ZFXVector &vcPoint);
+
+	//classify a point with respect to plane's front or back
+	inline int Classify(const ZFXVector &vcPoint);
+	inline int Classify(const ZFXPolygon &Poly);
+
+	//Clips a ray into two segments if it intersects the plane
+	bool Clip(const ZFXRay*, float, ZFXRay*, ZFXRay*);
+
+	//intersection with a triangle
+	bool Intersects(const ZFXVector &vc0, const ZFXVector &vc1, const ZFXVector &vc2);
+
+	//intersection line of two planes
+	bool Intersects(ZFXPlane &plane, ZFXRay *pIntersection);
+
+	//intersection with bounding boxes
+	bool Intersects(const ZFXAABB &aabb);
+	bool Intersects(const ZFXOBB &obb);
+
+};
+
+//Axis-Aligned Bounding Box (AABB)
+class __declspec(dllexport) ZFXAABB
+{
+public:
+	ZFXVector vcMin, vcMax; //extreme points
+	ZFXVector vcCenter;		//center point
+
+	ZFXAABB() { ; }
+
+	void Construct(const ZFXOBB &obb);
+	int	 Cull(const ZFXPlane *pPlanes, int nNumPlanes);
+
+	void GetPlanes(ZFXPlane *pPlanes);
+	bool Contains(const ZFXRay &ray, float fL);
+	bool Intersects(const ZFXRay &ray, float *t, float fL = -1);
+	bool Intersects(const ZFXAABB &aabb);
+	bool Intersects(const ZFXVector &vc);
+};
+
+//Oriented Bounding Box (OBB)
+class __declspec(dllexport) ZFXOBB
+{
+public:
+	float	 	 fA0,  fA1,  fA2;	//half-extent on each axis
+	ZFXVector	vcA0, vcA1, vcA2;	//axis vectors
+	ZFXVector	vcCenter;			// center point
+
+	ZFXOBB() { ; }
+
+	inline void DeTransform(const ZFXOBB &obb, const ZFXMatrix &m);
+
+	bool Intersects(const ZFXRay &Ray, float *t, float fL = -1);
+	bool Intersects(const ZFXOBB &obb);
+	bool Intersects(const ZFXVector &vc0, const ZFXVector &vc1, const ZFXVector &vc2);
+
+	int  Cull(const ZFXPlane *pPlanes, int nNumPlanes);
+
+private:
+	void ObbProj(const ZFXOBB &obb, const ZFXVector &vcV, float *pfMin, float *pfMax);
+	void TriProj(const ZFXVector &vc0, const ZFXVector &vc1, const ZFXVector &vc2, const ZFXVector &vcV, float*pfMin, float *pfMax);
 };

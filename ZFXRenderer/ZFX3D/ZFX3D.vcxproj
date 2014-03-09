@@ -80,8 +80,12 @@
     <ClInclude Include="ZFX3D.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ZFX3D_aabb.cpp" />
     <ClCompile Include="ZFX3D_CPU.cpp" />
     <ClCompile Include="ZFX3D_matrix.cpp" />
+    <ClCompile Include="ZFX3D_obb.cpp" />
+    <ClCompile Include="ZFX3D_plane.cpp" />
+    <ClCompile Include="ZFX3D_ray.cpp" />
     <ClCompile Include="ZFX3D_vector.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

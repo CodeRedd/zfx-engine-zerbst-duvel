@@ -156,13 +156,13 @@ inline void ZFXMatrix::TransposeOf(const ZFXMatrix &m)
 // invert the matrix
 inline void ZFXMatrix::InverseOf(const ZFXMatrix &m) {
 	ZFXMatrix mTrans;
-	float     fTemp[12],  // cofaktors
+	float     fTemp[12],  // temporary holder for cofactors
 		fDet;
 
 	// calculate transposed matrix
 	mTrans.TransposeOf(m);
 
-	// Paare fE die ersten 8 Kofaktoren
+	//first 8 cofactor pairs
 	fTemp[0] = mTrans._33 * mTrans._44;
 	fTemp[1] = mTrans._34 * mTrans._43;
 	fTemp[2] = mTrans._32 * mTrans._44;
@@ -176,7 +176,7 @@ inline void ZFXMatrix::InverseOf(const ZFXMatrix &m) {
 	fTemp[10] = mTrans._31 * mTrans._42;
 	fTemp[11] = mTrans._32 * mTrans._41;
 
-	// Berechne die ersten 8 Kofaktoren
+	//compute first 8 cofactors
 	this->_11 = fTemp[0] * mTrans._22 + fTemp[3] * mTrans._23 + fTemp[4] * mTrans._24;
 	this->_11 -= fTemp[1] * mTrans._22 + fTemp[2] * mTrans._23 + fTemp[5] * mTrans._24;
 	this->_12 = fTemp[1] * mTrans._21 + fTemp[6] * mTrans._23 + fTemp[9] * mTrans._24;
@@ -194,7 +194,7 @@ inline void ZFXMatrix::InverseOf(const ZFXMatrix &m) {
 	this->_24 = fTemp[4] * mTrans._11 + fTemp[9] * mTrans._12 + fTemp[10] * mTrans._13;
 	this->_24 -= fTemp[5] * mTrans._11 + fTemp[8] * mTrans._12 + fTemp[11] * mTrans._13;
 
-	// Paare fE die zweiten 8 Kofaktoren
+	//second 8 cofactor pairs
 	fTemp[0] = mTrans._13 * mTrans._24;
 	fTemp[1] = mTrans._14 * mTrans._23;
 	fTemp[2] = mTrans._12 * mTrans._24;
@@ -208,7 +208,7 @@ inline void ZFXMatrix::InverseOf(const ZFXMatrix &m) {
 	fTemp[10] = mTrans._11 * mTrans._22;
 	fTemp[11] = mTrans._12 * mTrans._21;
 
-	// Berechne die zweiten 8 Kofaktoren
+	//compute second 8 cofactors
 	this->_31 = fTemp[0] * mTrans._42 + fTemp[3] * mTrans._43 + fTemp[4] * mTrans._44;
 	this->_31 -= fTemp[1] * mTrans._42 + fTemp[2] * mTrans._43 + fTemp[5] * mTrans._44;
 	this->_32 = fTemp[1] * mTrans._41 + fTemp[6] * mTrans._43 + fTemp[9] * mTrans._44;
