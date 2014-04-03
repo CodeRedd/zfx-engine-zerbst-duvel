@@ -44,5 +44,11 @@
     <ClCompile Include="ZFX3D_obb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ZFX3D_polygon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ZFX3D_quat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

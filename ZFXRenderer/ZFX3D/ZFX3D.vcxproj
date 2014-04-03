@@ -85,6 +85,8 @@
     <ClCompile Include="ZFX3D_matrix.cpp" />
     <ClCompile Include="ZFX3D_obb.cpp" />
     <ClCompile Include="ZFX3D_plane.cpp" />
+    <ClCompile Include="ZFX3D_polygon.cpp" />
+    <ClCompile Include="ZFX3D_quat.cpp" />
     <ClCompile Include="ZFX3D_ray.cpp" />
     <ClCompile Include="ZFX3D_vector.cpp" />
   </ItemGroup>

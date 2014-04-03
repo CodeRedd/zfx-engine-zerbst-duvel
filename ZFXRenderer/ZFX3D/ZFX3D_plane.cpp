@@ -52,7 +52,7 @@ inline int ZFXPlane::Classify(const ZFXVector &vcPoint)
 }
 
 // Classify polygon with respect to this plane
-/*int ZFXPlane::Classify(const ZFXPolygon &Poly) {
+int ZFXPlane::Classify(const ZFXPolygon &Poly) {
 	int NumFront = 0, NumBack = 0, NumPlanar = 0;
 	int nClass;
 
@@ -99,7 +99,7 @@ inline int ZFXPlane::Classify(const ZFXVector &vcPoint)
 	{
 		return ZFXCLIPPED;
 	}
-}*/
+}
 
 bool ZFXPlane::Clip(const ZFXRay *_pRay, float fL, ZFXRay *pF, ZFXRay *pB) {
 	ZFXVector vcHit(0.0f, 0.0f, 0.0f);

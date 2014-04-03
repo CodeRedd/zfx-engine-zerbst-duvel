@@ -5,6 +5,13 @@
 #include <Windows.h>
 #include <math.h>
 
+//math constants
+const double ZFXPI = 3.14159265;
+const double ZFXPI2 = 1.5707963;
+const double ZFX2PI = 6.2831853;
+const float  ZFXG = -32.174f; // ft/s^2
+const float  ZFXEPSILON = 0.00001f;
+
 //definitions
 #define ZFXFRONT	0
 #define ZFXBACK		1
@@ -220,4 +227,82 @@ public:
 private:
 	void ObbProj(const ZFXOBB &obb, const ZFXVector &vcV, float *pfMin, float *pfMax);
 	void TriProj(const ZFXVector &vc0, const ZFXVector &vc1, const ZFXVector &vc2, const ZFXVector &vcV, float*pfMin, float *pfMax);
+};
+
+//Polygon
+//NOTE: DO NOT USE THIS CLASS FOR RENDERING. IT IS ONLY MEANT FOR COLLISION DETECTION
+class __declspec(dllexport) ZFXPolygon
+{
+	friend class ZFXPlane;
+
+private:
+	ZFXPlane		m_Plane;	//plane of polygon
+	int				m_NumP;		//number of points
+	int				m_NumI;		//number of indices
+	ZFXAABB			m_Aabb;		//bounding box
+	unsigned int	m_Flag;		//flag for free use
+	ZFXVector		*m_pPoints;	//points defining the polygon
+	unsigned int	*m_pIndic;	//indices for triangulation of the polygon
+
+	void CalcBoundingBox();
+
+public:
+	ZFXPolygon();
+	~ZFXPolygon();
+
+	void			Set(const ZFXVector*, int, const unsigned int*, int);
+	void			Clip(const ZFXPlane &plane, ZFXPolygon *pFront, ZFXPolygon *pBack );
+	void			Clip(const ZFXAABB &aabb);
+	int				Cull(const ZFXAABB &aabb); 
+	void			CopyOf(const ZFXPolygon &poly);
+
+	void			SwapFaces();
+	bool			Intersects(const ZFXRay&, bool, float* t,float fL = -1);
+
+	int				GetNumPoints()	{ return m_NumP; }
+	int				GetNumIndic()	{ return m_NumI; }
+	ZFXVector*		GetPoints()		{ return m_pPoints; }
+	unsigned int*	GetIndices()	{ return m_pIndic; }
+	ZFXPlane		GetPlane()		{ return m_Plane; }
+	ZFXAABB			GetAabb()		{ return m_Aabb; }
+	unsigned int	GetFlag()		{ return m_Flag; }
+	void			SetFlag(unsigned int n) { m_Flag = n; }
+
+};
+
+//Quaternion
+class __declspec(dllexport) ZFXQuat
+{
+public:
+	float x, y, z, w;
+
+	ZFXQuat() { x = 0.0f, y = 0.0f, z = 0.0f, w = 1.0f; }
+	ZFXQuat(float _x, float _y, float _z, float _w) { x = _x; y = _y; z = _z; w = _w; }
+
+	void  CreateFromEuler(float fPitch, float fYaw, float fRoll);
+	void  Normalize();
+	void  Conjugate(ZFXQuat q);
+	void  GetEulers(float *fPitch, float *fYaw, float *fRoll);
+	void  GetMatrix(ZFXMatrix *m);
+	float GetMagnitude();
+
+	void    operator /= (float f);
+	ZFXQuat operator /  (float f);
+
+	void    operator *= (float f);
+	ZFXQuat operator *  (float f);
+
+	ZFXQuat operator *  (const ZFXVector &v) const;
+
+	ZFXQuat operator *	(const ZFXQuat &q)const;
+	void	operator *= (const ZFXQuat &q);
+
+	void    operator += (const ZFXQuat &q);
+	ZFXQuat operator +  (const ZFXQuat &q) const;
+
+	ZFXQuat operator~(void) const { return ZFXQuat(-x, -y, -z, w); }
+
+	void Rotate(const ZFXQuat &q1, const ZFXQuat &q2);
+
+	ZFXVector Rotate(const ZFXVector &v);
 };

@@ -228,12 +228,12 @@ float ZFXVector::operator * (const ZFXVector &v) const {
 	return (v.x*x + v.y*y + v.z*z);
 }
 
-/*ZFXQuat ZFXVector::operator * (const ZFXQuat &q) const {
+ZFXQuat ZFXVector::operator * (const ZFXQuat &q) const {
 	return ZFXQuat(q.w*x + q.z*y - q.y*z,
 		q.w*y + q.x*z - q.z*x,
 		q.w*z + q.y*x - q.x*y,
 		-(q.x*x + q.y*y + q.z*z));
-}*/
+}
 
 ZFXVector ZFXVector::operator * (const ZFXMatrix &m) const
 {
