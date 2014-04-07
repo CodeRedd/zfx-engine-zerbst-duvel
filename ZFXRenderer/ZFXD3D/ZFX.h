@@ -1,9 +1,11 @@
 //File: ZFX.h 
 //Created by Stefan Zerbst and Oliver Duvel
 //Enumeration code originally found only on CD-ROM accompanying book, which I am missing.
-//Found copy of enum code on Google Code here: https://code.google.com/p/3d-zfxengine/source/browse/ZFXEngine/ZFXD3D/ZFX.h?r=3&spec=svn3
+//Found copy of macro code on Google Code here: https://code.google.com/p/3d-zfxengine/source/browse/ZFXEngine/ZFXD3D/ZFX.h?r=3&spec=svn3
 //Google Code implementation by contealucard
 //I am distributing via GNU GPLv3--see License.txt for details.
+
+#include <Windows.h>
 
 // everything went smooth
 #define ZFX_OK                        S_OK
@@ -29,3 +31,45 @@
 #define ZFX_FAILb               0x8200000d
 #define ZFX_FAILc               0x8200000e
 #define ZFX_FAILd               0x8200000f
+
+typedef struct ZFXCOLOR
+{
+	union
+	{
+		struct
+		{
+			float fR;
+			float fG;
+			float fB;
+			float fA;
+		};
+		float c[4];
+	};
+};
+
+//this is similar to D3D9 material, but we want to stay API-independent
+typedef struct ZFXMATERIAL
+{
+	ZFXCOLOR cDiffuse;	//RGBA diffuse light
+	ZFXCOLOR cAmbient;	//RGBA ambient light
+	ZFXCOLOR cSpecular;	//RGBA specular light
+	ZFXCOLOR cEmissive; //RGBA emissive light
+	float	 fPower;	//specular exponent
+};
+
+//also similar to D3D9 but again we want to stay independent of API
+typedef struct ZFXTEXTURE
+{
+	float		fAlpha;		//transparency
+	TCHAR		*chName;	//texture filename--also used as ID for texture so that we don't load the same file more than once
+	void		*pData;		//texture data
+	ZFXCOLOR	*pClrKeys;	//color key array
+	DWORD		dwNum;		//number of color keys
+};
+
+typedef struct ZFXSKIN
+{
+	bool	bAlpha;		//do we use non-unity alpha values?
+	UINT	nMaterial;
+	UINT	nTexture[8];//can hold up to 8 textures to support multi-pass rendering
+};

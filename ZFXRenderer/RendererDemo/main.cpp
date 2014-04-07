@@ -81,6 +81,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lpCmdLine, in
 	{
 		fprintf(g_pLog, "ProgramStartup() canceled\n");
 		g_bDone = true;
+		PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
 	}
 	else
 	{
