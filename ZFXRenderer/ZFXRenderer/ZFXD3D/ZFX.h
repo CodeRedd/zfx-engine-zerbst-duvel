@@ -32,7 +32,7 @@
 #define ZFX_FAILc               0x8200000e
 #define ZFX_FAILd               0x8200000f
 
-typedef struct ZFXCOLOR
+struct ZFXCOLOR
 {
 	union
 	{
@@ -45,10 +45,10 @@ typedef struct ZFXCOLOR
 		};
 		float c[4];
 	};
-};
+}; 
 
 //this is similar to D3D9 material, but we want to stay API-independent
-typedef struct ZFXMATERIAL
+struct ZFXMATERIAL
 {
 	ZFXCOLOR cDiffuse;	//RGBA diffuse light
 	ZFXCOLOR cAmbient;	//RGBA ambient light
@@ -58,16 +58,16 @@ typedef struct ZFXMATERIAL
 };
 
 //also similar to D3D9 but again we want to stay independent of API
-typedef struct ZFXTEXTURE
+struct ZFXTEXTURE
 {
 	float		fAlpha;		//transparency
 	TCHAR		*chName;	//texture filename--also used as ID for texture so that we don't load the same file more than once
 	void		*pData;		//texture data
-	ZFXCOLOR	*pClrKeys;	//color key array
+	ZFXCOLOR	*pClrKeys;	//color key array -- adjust an RGB color to a specific alpha value
 	DWORD		dwNum;		//number of color keys
 };
 
-typedef struct ZFXSKIN
+struct ZFXSKIN
 {
 	bool	bAlpha;		//do we use non-unity alpha values?
 	UINT	nMaterial;

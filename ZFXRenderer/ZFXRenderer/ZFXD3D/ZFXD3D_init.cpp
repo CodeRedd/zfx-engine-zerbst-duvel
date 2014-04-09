@@ -4,7 +4,6 @@
 
 #include "resource.h"
 
-#include "ZFX.h"
 #include "ZFXD3D.h"
 
 //variables for callbacks to dialog

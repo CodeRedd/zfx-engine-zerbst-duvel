@@ -135,11 +135,25 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ZFXD3D\ZFXD3D_enum.cpp" />
+    <ClCompile Include="ZFXD3D\ZFXD3D_init.cpp" />
+    <ClCompile Include="ZFXD3D\ZFXD3D_main.cpp" />
+    <ClCompile Include="ZFXD3D\ZFXD3D_skinmgr.cpp" />
     <ClCompile Include="ZFXRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ZFXD3D\resource.h" />
+    <ClInclude Include="ZFXD3D\ZFX.h" />
+    <ClInclude Include="ZFXD3D\ZFXD3D.h" />
+    <ClInclude Include="ZFXD3D\ZFXD3D_skinmgr.h" />
     <ClInclude Include="ZFXRenderer.h" />
     <ClInclude Include="ZFXRenderDevice.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ZFXD3D\dlgChangeDevice.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ZFXD3D\ZFXD3D.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

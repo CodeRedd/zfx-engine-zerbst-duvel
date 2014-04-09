@@ -8,8 +8,7 @@
 
 #include <Windows.h>
 #include <D3D9.h>
-
-#include "../ZFXRenderer/ZFXRenderDevice.h"
+#include "..\ZFXRenderDevice.h"
 
 
 //creates some macros for utility functions that should exist outside the RenderDevice interface

@@ -2,7 +2,6 @@
 //Created by Stefan Zerbst and Oliver Duvel
 //Reimplemented by Culver Redd
 
-#include "ZFX.h"
 #include "ZFXD3D.h"
 
 HRESULT ZFXD3D::UseWindow(UINT nHwnd)

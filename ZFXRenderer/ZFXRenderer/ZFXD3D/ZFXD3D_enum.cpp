@@ -8,7 +8,6 @@
 
 #include "atlconv.h"
 #include "resource.h"      // control id's
-#include "ZFX.h"           // return values and stuff
 #include "ZFXD3D.h"        // class definition
 
 
