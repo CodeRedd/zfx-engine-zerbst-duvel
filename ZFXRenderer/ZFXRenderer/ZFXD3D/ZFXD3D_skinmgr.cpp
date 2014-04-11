@@ -7,6 +7,8 @@
 extern bool g_bLF; //determines whether to flush the log file for crash safety
 
 //constructor
+//NOTE: The arrays for textures, skins, and materials have entry memory allocated in chunks of size MAX_ARRAY_ALLOCATION to prevent
+//excessive fragmentation
 ZFXD3DSkinManager::ZFXD3DSkinManager(LPDIRECT3DDEVICE9 pDevice, FILE *pLog)
 {
 	m_nNumMaterials = 0;
@@ -64,6 +66,75 @@ ZFXD3DSkinManager::~ZFXD3DSkinManager()
 	Log(L"offline (ok)");
 }
 
+HRESULT ZFXD3DSkinManager::AddSkin(const ZFXCOLOR *pcAmbient, const ZFXCOLOR *pcDiffuse, const ZFXCOLOR *pcEmissive,
+								   const ZFXCOLOR *pcSpecular, float fSpecPower, UINT *nSkinID)
+{
+	UINT nMat, n;
+	bool bMat = false;
+
+	//allocate memory for new skins if needed
+	if (m_nNumSkins % ARRAY_ALLOCATION_SIZE == 0)
+	{
+		n = (m_nNumSkins + ARRAY_ALLOCATION_SIZE)*sizeof(ZFXSKIN);
+		m_pSkins = (ZFXSKIN*)realloc(m_pSkins, n);
+		if (!m_pSkins)
+		{
+			return ZFX_OUTOFMEMORY;
+		}
+	}
+
+	ZFXMATERIAL mat;
+	mat.cAmbient = *pcAmbient;
+	mat.cDiffuse = *pcDiffuse;
+	mat.cEmissive = *pcEmissive;
+	mat.cSpecular = *pcSpecular;
+	mat.fPower = fSpecPower;
+
+	//does this material already exist?
+	for (nMat = 0; nMat < m_nNumMaterials; nMat++)
+	{
+		if (MaterialEqual(&mat, &m_pMaterials[nMat]))
+		{
+			bMat = true;
+			break;
+		}
+	}
+
+	//if so, save its id, otherwise add the new material and increment counter
+	if (bMat)
+	{
+		m_pSkins[m_nNumSkins].nMaterial = nMat;
+	}
+	else
+	{
+		m_pSkins[m_nNumSkins].nMaterial = m_nNumMaterials;
+
+		//allocate memory for more materials if needed
+		if (m_nNumMaterials % ARRAY_ALLOCATION_SIZE == 0)
+		{
+			n = (m_nNumMaterials + ARRAY_ALLOCATION_SIZE)*sizeof(ZFXMATERIAL);
+			m_pMaterials = (ZFXMATERIAL*)realloc(m_pMaterials, n);
+			if (!m_pMaterials)
+			{
+				return ZFX_OUTOFMEMORY;
+			}
+		}
+
+		memcpy(&m_pMaterials[m_nNumMaterials], &mat, sizeof(ZFXMATERIAL));
+		m_nNumMaterials++;
+	}
+
+	//create the new skin and increment counter
+	m_pSkins[m_nNumSkins].bAlpha = false;
+	for (int i = 0; i < 8; i++)
+	{
+		m_pSkins[m_nNumSkins].nTexture[i] = MAX_ID; //MAX_ID is interpreted as an invalid texture ID in this engine
+	}
+	(*nSkinID) = m_nNumSkins;
+	m_nNumSkins++;
+
+	return ZFX_OK;
+}
 
 
 //compare two colors--are any of the RGBA values different?

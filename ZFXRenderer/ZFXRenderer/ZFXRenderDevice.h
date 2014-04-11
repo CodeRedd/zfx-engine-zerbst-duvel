@@ -7,7 +7,9 @@
 
 #include "ZFXD3D\ZFX.h"
 
-#define MAX_3DHWND 8
+#define ARRAY_ALLOCATION_SIZE 50
+#define MAX_3DHWND			  8
+
 
 //Interface for the ZFX Engine 2.0 skin manager
 class ZFXSkinManager
