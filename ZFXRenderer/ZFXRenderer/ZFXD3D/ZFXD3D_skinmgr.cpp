@@ -136,6 +136,214 @@ HRESULT ZFXD3DSkinManager::AddSkin(const ZFXCOLOR *pcAmbient, const ZFXCOLOR *pc
 	return ZFX_OK;
 }
 
+//add texture to a skin
+HRESULT ZFXD3DSkinManager::AddTexture(UINT nSkinID, const TCHAR *chName, bool bAlpha, float fAlpha, ZFXCOLOR *cColorKeys, DWORD dwNumColorKeys)
+{
+	ZFXTEXTURE *pZFXTex = NULL;	//helper pointer
+	HRESULT hr;
+	UINT nTex, n;
+	bool bTex = false;
+
+	//is skin ID valid?
+	if (nSkinID >= m_nNumSkins)
+	{
+		return ZFX_INVALIDID;
+	}
+
+	//do we have a free texture slot on the skin?
+	if (m_pSkins[nSkinID].nTexture[7] != MAX_ID)
+	{
+		Log(L"error: AddTexture() failed, all 8 stages set");
+		return ZFX_BUFFERSIZE;
+	}
+
+	//is this texture already loaded?
+	for (nTex = 0; nTex < m_nNumTextures; nTex++)
+	{
+		if (wcscmp(chName, m_pTextures[nTex].chName) == 0)
+		{
+			bTex = true;
+			break;
+		}
+	}
+
+	//load new texture if necessary
+	if (!bTex)
+	{
+		//allocate memory for more textures if needed
+		if (m_nNumTextures % ARRAY_ALLOCATION_SIZE == 0)
+		{
+			n = (m_nNumTextures + ARRAY_ALLOCATION_SIZE)*sizeof(ZFXTEXTURE);
+			m_pTextures = (ZFXTEXTURE*)realloc(m_pTextures, n);
+			if (!m_pTextures)
+			{
+				return ZFX_OUTOFMEMORY;
+			}
+		}
+
+		//do we need alpha blending?
+		if (bAlpha)
+		{
+			m_pSkins[nSkinID].bAlpha = true;
+		}
+		else
+		{
+			m_pTextures[m_nNumTextures].fAlpha = 1.0f;
+		}
+
+		m_pTextures[m_nNumTextures].pClrKeys = NULL;
+
+		//save texture name
+		m_pTextures[m_nNumTextures].chName = new TCHAR[wcslen(chName)+1];
+		memcpy(m_pTextures[m_nNumTextures].chName, chName, wcslen(chName)+1);
+
+		//create new Direct3D texture object
+		hr = CreateTexture(&m_pTextures[m_nNumTextures], bAlpha);
+		if (FAILED(hr))
+		{
+			Log(L"error: CreateTexture() failed");
+			return hr;
+		}
+
+		//add alpha channel if necessary
+		if (bAlpha)
+		{
+			pZFXTex = &m_pTextures[m_nNumTextures];
+			pZFXTex->dwNum = dwNumColorKeys;
+			pZFXTex->pClrKeys = new ZFXCOLOR[dwNumColorKeys];
+			memcpy(pZFXTex->pClrKeys, cColorKeys, sizeof(ZFXCOLOR)*pZFXTex->dwNum);
+			LPDIRECT3DTEXTURE9 pTex = (LPDIRECT3DTEXTURE9) pZFXTex->pData;
+
+			//color keys are added first--the SetAlphaKey function expects colors with an alpha value of unity
+			for (DWORD dw = 0; dw < dwNumColorKeys; dw++)
+			{
+				hr = SetAlphaKey(&pTex, UCHAR(cColorKeys[dw].fR * 255), UCHAR(cColorKeys[dw].fG * 255),
+								 UCHAR(cColorKeys[dw].fB * 255), UCHAR(cColorKeys[dw].fA * 255));
+			}
+
+			if (FAILED(hr))
+			{
+				Log(L"error: SetAlphaKey() failed");
+				return hr;
+			}
+
+			//now add general transparency
+			if (fAlpha < 1.0f)
+			{
+				m_pTextures[m_nNumTextures].fAlpha = fAlpha;
+				hr = SetTransparency(&pTex, UCHAR(fAlpha*255));
+				if (FAILED(hr))
+				{
+					Log(L"error: SetTransparency() failed");
+					return hr;
+				}
+			}
+		}
+
+		//save id and increment counter
+		nTex = m_nNumTextures;
+		m_nNumTextures++;
+	}
+	
+	//save id to first free texture slot in the skin
+	for (int i = 0; i < 8; i++)
+	{
+		if (m_pSkins[nSkinID].nTexture[i] == MAX_ID)
+		{
+			m_pSkins[nSkinID].nTexture[i] = nTex;
+			break;
+		}
+	}
+
+	return ZFX_OK;
+}
+
+//add texture to a skin as a normal map
+HRESULT ZFXD3DSkinManager::AddTextureHeightMapAsBump(UINT nSkinID, const TCHAR *chName)
+{
+	ZFXTEXTURE *pZFXTex = NULL;	//helper pointer
+	HRESULT hr;
+	UINT nTex, n;
+	bool bTex = false;
+
+	//is skin ID valid?
+	if (nSkinID >= m_nNumSkins)
+	{
+		return ZFX_INVALIDID;
+	}
+
+	//do we have a free texture slot on the skin?
+	if (m_pSkins[nSkinID].nTexture[7] != MAX_ID)
+	{
+		Log(L"error: AddTexture() failed, all 8 stages set");
+		return ZFX_BUFFERSIZE;
+	}
+
+	//is this texture already loaded?
+	for (nTex = 0; nTex < m_nNumTextures; nTex++)
+	{
+		if (wcscmp(chName, m_pTextures[nTex].chName) == 0)
+		{
+			bTex = true;
+			break;
+		}
+	}
+
+	//load new texture if necessary
+	if (!bTex)
+	{
+		//allocate memory for more textures if needed
+		if (m_nNumTextures % ARRAY_ALLOCATION_SIZE == 0)
+		{
+			n = (m_nNumTextures + ARRAY_ALLOCATION_SIZE)*sizeof(ZFXTEXTURE);
+			m_pTextures = (ZFXTEXTURE*)realloc(m_pTextures, n);
+			if (!m_pTextures)
+			{
+				return ZFX_OUTOFMEMORY;
+			}
+		}
+
+		//no alpha needed
+		m_pTextures[m_nNumTextures].fAlpha = 1.0f;
+		m_pTextures[m_nNumTextures].pClrKeys = NULL;
+
+		//save texture name
+		m_pTextures[m_nNumTextures].chName = new TCHAR[wcslen(chName) + 1];
+		memcpy(m_pTextures[m_nNumTextures].chName, chName, wcslen(chName) + 1);
+
+		//create new Direct3D texture object
+		hr = CreateTexture(&m_pTextures[m_nNumTextures], true);
+		if (FAILED(hr))
+		{
+			Log(L"error: CreateTexture() failed");
+			return hr;
+		}
+
+		//build normals from height values
+		//hr = ConvertToNormalMap(&m_pTextures[m_nNumTextures]);
+		if (FAILED(hr))
+		{
+			Log(L"error: ConvertToNormalMap() failed");
+			return hr;
+		}
+
+		//save id and increment counter
+		nTex = m_nNumTextures;
+		m_nNumTextures++;
+	}
+
+	//save id to first free texture slot in the skin
+	for (int i = 0; i < 8; i++)
+	{
+		if (m_pSkins[nSkinID].nTexture[i] == MAX_ID)
+		{
+			m_pSkins[nSkinID].nTexture[i] = nTex;
+			break;
+		}
+	}
+
+	return ZFX_OK;
+}
 
 //compare two colors--are any of the RGBA values different?
 inline bool ZFXD3DSkinManager::ColorEqual(const ZFXCOLOR *pCol0, const ZFXCOLOR *pCol1)
