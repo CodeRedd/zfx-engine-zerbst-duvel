@@ -345,6 +345,215 @@ HRESULT ZFXD3DSkinManager::AddTextureHeightMapAsBump(UINT nSkinID, const TCHAR *
 	return ZFX_OK;
 }
 
+//macro for downgrading from 24-bit color to 16-bit color
+#define RGB16BIT(r, g, b) ((b%32) + (g%64) << 5) + ((r%32) << 11)
+//loads in an image from file and maps it to a Direct3D texture and ZFXTEXTURE. Contains unused 16-bit color support as an exercise
+HRESULT ZFXD3DSkinManager::CreateTexture(ZFXTEXTURE *pTexture, bool bAlpha)
+{
+	D3DLOCKED_RECT		d3dRect;
+	D3DFORMAT			fmt;
+	DIBSECTION			dibS;
+	HRESULT				hr;
+	int					LineWidth;
+	void				*pMemory = NULL;
+
+	//loads initial data from file to a bitmap handle
+	HBITMAP hBMP = (HBITMAP)LoadImage(NULL, pTexture->chName, IMAGE_BITMAP,0,0,LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+	if (!hBMP)
+	{
+		return ZFX_FILENOTFOUND;
+	}
+
+	//gets the DIBSection struct
+	GetObject(hBMP, sizeof(DIBSECTION), &dibS);
+
+	//we support only 24-bit bitmaps
+	if (dibS.dsBmih.biBitCount != 24)
+	{
+		DeleteObject(hBMP);
+		return ZFX_INVALIDFILE;
+	}
+
+	//if(!bAlpha)
+	//{
+	fmt = D3DFMT_A8R8G8B8;
+	/*}
+	else
+	{
+		fmt = D3DFMT_R5G6B5;
+	}
+	*/
+
+	long lWidth		= dibS.dsBmih.biWidth;
+	long lHeight	= dibS.dsBmih.biHeight;
+	BYTE *pBMPBits = (BYTE*)dibS.dsBm.bmBits;
+
+	//create the shell of a Direct3D texture object
+	hr = m_pDevice->CreateTexture(lWidth, lHeight, 1, 0, fmt, D3DPOOL_MANAGED, (LPDIRECT3DTEXTURE9*)(&(pTexture->pData)), NULL);
+
+	//set dummy pointer
+	LPDIRECT3DTEXTURE9 pTex = ((LPDIRECT3DTEXTURE9)pTexture->pData);
+
+	if (FAILED(pTex->LockRect(0, &d3dRect, NULL, 0)))
+	{
+		return ZFX_BUFFERLOCK;
+	}
+
+	//if(bAlpha)
+	//{
+	LineWidth = d3dRect.Pitch >> 2; //32 bit = 4 byte
+	pMemory = (DWORD*)d3dRect.pBits;
+	/*}
+	else
+	{
+		LineWidth = d3dRect.Pitch >> 1; //15 bit = 2 byte
+		pMemory = (USHORT*)d3dRect.pBits;
+	}
+	*/
+
+	//copy each pixel
+	for (int cy = 0; cy < lHeight; cy++)
+	{
+		for (int cx = 0; cx < lWidth; cx++)
+		{
+			//if(bAlpha)
+			//{
+			DWORD Color = 0xff000000;
+			int i = (cy*lWidth + cx)*3;
+			memcpy(&Color, &pBMPBits[i], sizeof(BYTE)*3);
+
+			((DWORD*)pMemory)[cx + (cy*LineWidth)] = Color;
+			/*}
+			else
+			{
+				//convert 24 bit to 16 bit
+				UCHAR B = (pBMPBits[(xy*lWidth+cx)*3 + 0])>>3,
+					  G = (pBMPBits[(xy*lWidth+cx)*3 + 1])>>3,
+					  R = (pBMPBits[(xy*lWidth+cx)*3 + 2])>>3;
+
+				//map values to 5,6,5 bit pattern and call macro
+				USHORT Color = RGB16BIT( (int)(((float) R / 255.0f) * 32.0f),
+										 (int)(((float) G / 255.0f) * 64.0f),
+										 (int)(((float) B / 255.0f) * 32.0f) );
+				
+				//write pixel as 16-bit color
+				((USHORT*)pMemory)[cx+(cy*LineWidth)] = Color;
+			}
+			*/
+		}
+	}
+
+	pTex->UnlockRect(0);
+	DeleteObject(hBMP);
+	return ZFX_OK;
+}
+
+
+//D3D stores RGBA colors as a single 32-bit value. This function will combine 8-bit values to make a D3D-friendly DWORD
+DWORD ZFXD3DSkinManager::MakeD3DColor(UCHAR R, UCHAR G, UCHAR B, UCHAR A)
+{
+	return (A << 24) | (R << 16) | (G << 8) | B;
+}
+
+//Applies single-color transparency effect (aka chroma key or green screen) to a texture
+//NOTE: This function requires that color key not have any non-unity alpha values!
+HRESULT ZFXD3DSkinManager::SetAlphaKey(LPDIRECT3DTEXTURE9 *ppTexture, UCHAR R, UCHAR G, UCHAR B, UCHAR A)
+{
+	D3DSURFACE_DESC	d3dDesc;
+	D3DLOCKED_RECT	d3dRect;
+	DWORD			dwKey, Color;
+
+	//make sure we're using 32-bit ARGB format
+	(*ppTexture)->GetLevelDesc(0, &d3dDesc);
+	if (d3dDesc.Format != D3DFMT_A8R8G8B8)
+	{
+		return ZFX_INVALIDPARAM;
+	}
+
+	//color to be replaced
+	dwKey = MakeD3DColor(R, G, B, 255);
+
+	//color to replace old one with
+	if (A > 0)
+	{
+		Color = MakeD3DColor(R, G, B, A);
+	}
+	else
+	{
+		Color = MakeD3DColor(0, 0, 0, A);
+	}
+
+	if (FAILED((*ppTexture)->LockRect(0, &d3dRect, NULL, 0)))
+	{
+		return ZFX_BUFFERLOCK;
+	}
+
+	//overwrite all pixels to be replaced
+	for (DWORD y = 0; y < d3dDesc.Height; y++)
+	{
+		for (DWORD x = 0; x < d3dDesc.Width; x++)
+		{
+			if (((DWORD*)d3dRect.pBits)[d3dDesc.Width*y + x] == dwKey)
+			{
+				((DWORD*)d3dRect.pBits)[d3dDesc.Width*y+x] = Color;
+			}
+		}
+	}
+
+	(*ppTexture)->UnlockRect(0);
+	return ZFX_OK;
+}
+
+//Sets the overall transparency of the texture
+HRESULT ZFXD3DSkinManager::SetTransparency(LPDIRECT3DTEXTURE9 *ppTexture, UCHAR Alpha)
+{
+	D3DSURFACE_DESC	d3dDesc;
+	D3DLOCKED_RECT  d3dRect;
+	DWORD			Color;
+	UCHAR			A, R, G, B;
+
+	//make sure we're using 32-bit ARGB format
+	(*ppTexture)->GetLevelDesc(0, &d3dDesc);
+	if (d3dDesc.Format != D3DFMT_A8R8G8B8)
+	{
+		return ZFX_INVALIDPARAM;
+	}
+
+	if (FAILED((*ppTexture)->LockRect(0, &d3dRect, NULL, 0)))
+	{
+		return ZFX_BUFFERLOCK;
+	}
+
+	//loop through all pixels
+	for (DWORD y = 0; y < d3dDesc.Height; y++)
+	{
+		for (DWORD x = 0; x < d3dDesc.Width; x++)
+		{
+			//get color from the pixel
+			Color = ((DWORD*)d3dRect.pBits)[d3dDesc.Width*y+x];
+
+			//calculate ARGB values
+			A = (UCHAR)((Color & 0xff000000) >> 24);
+			R = (UCHAR)((Color & 0x00ff0000) >> 16);
+			G = (UCHAR)((Color & 0x0000ff00) >> 8);
+			B = (UCHAR)((Color & 0x000000ff) >> 0);
+
+			//set new alpha value only if new alpha is lower
+			//if we're already at 100% transparency, we don't want to become less transparent by applying a new layer of 50% transparency
+			if (A >= Alpha)
+			{
+				A = Alpha;
+			}
+
+			((DWORD*)d3dRect.pBits)[d3dDesc.Width*y + x] = MakeD3DColor(R, G, B, A);
+		}
+	}
+
+	(*ppTexture)->UnlockRect(0);
+	return ZFX_OK;
+}
+
+
 //compare two colors--are any of the RGBA values different?
 inline bool ZFXD3DSkinManager::ColorEqual(const ZFXCOLOR *pCol0, const ZFXCOLOR *pCol1)
 {
