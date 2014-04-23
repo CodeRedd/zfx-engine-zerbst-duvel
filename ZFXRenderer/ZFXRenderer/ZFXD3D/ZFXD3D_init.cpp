@@ -23,6 +23,7 @@ extern "C"				__declspec(dllexport) HRESULT CreateRenderDevice(HINSTANCE hDLL, Z
 		*pDevice = new ZFXD3D( hDLL );
 		return ZFX_OK;
 	}
+
 	return ZFX_FAIL;
 }
 

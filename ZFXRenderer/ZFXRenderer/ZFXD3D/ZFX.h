@@ -34,6 +34,25 @@
 #define ZFX_FAILc               0x8200000e
 #define ZFX_FAILd               0x8200000f
 
+//ENUMS
+typedef enum ZFXENGINEMODE
+{
+	EMD_PERSPECTIVE, //perspective projection
+	EMD_TWOD,		 //world equals screen coords
+	EMD_ORTHOGONAL	 //orthogonal projection
+};
+
+
+//STRUCTS
+struct ZFXVIEWPORT
+{
+	DWORD X; //position of upper ...
+	DWORD Y; // ...left corner
+	DWORD Width;
+	DWORD Height;
+};
+
+
 struct ZFXCOLOR
 {
 	union

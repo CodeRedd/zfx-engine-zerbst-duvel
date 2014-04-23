@@ -80,6 +80,9 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>ZFX3DMath.lib,</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -138,14 +141,18 @@
     <ClCompile Include="ZFXD3D\ZFXD3D_enum.cpp" />
     <ClCompile Include="ZFXD3D\ZFXD3D_init.cpp" />
     <ClCompile Include="ZFXD3D\ZFXD3D_main.cpp" />
+    <ClCompile Include="ZFXD3D\ZFXD3D_misc.cpp" />
     <ClCompile Include="ZFXD3D\ZFXD3D_skinmgr.cpp" />
+    <ClCompile Include="ZFXD3D\ZFXD3D_vcache.cpp" />
     <ClCompile Include="ZFXRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ZFX3D.h" />
     <ClInclude Include="ZFXD3D\resource.h" />
     <ClInclude Include="ZFXD3D\ZFX.h" />
     <ClInclude Include="ZFXD3D\ZFXD3D.h" />
     <ClInclude Include="ZFXD3D\ZFXD3D_skinmgr.h" />
+    <ClInclude Include="ZFXD3D\ZFXD3D_vcache.h" />
     <ClInclude Include="ZFXRenderer.h" />
     <ClInclude Include="ZFXRenderDevice.h" />
   </ItemGroup>

@@ -140,7 +140,11 @@ public:
 	//Pathway for graphics options UI to access DLL functions 
 	BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 	
-	//Interface functions
+	/////////////////////////
+	// INTERFACE FUNCTIONS
+	/////////////////////////
+
+	//general
 	void	Release();
 	bool	IsRunning() { return m_bIsSceneRunning; }
 	HRESULT BeginRendering(bool, bool, bool);
@@ -148,9 +152,21 @@ public:
 	void	EndRendering();
 	void	SetClearColor(float, float, float);
 	HRESULT	UseWindow(UINT nHwnd);
+	ZFXSkinManager* GetSkinManager(){ return m_pSkinMan; }
 
+	//view stuff
+	HRESULT   SetView3D(const ZFXVector&, const ZFXVector&,	const ZFXVector&, const ZFXVector&);
+	HRESULT   SetViewLookAt(const ZFXVector&, const ZFXVector&,	const ZFXVector&);
+	void      SetClippingPlanes(float, float);
+	HRESULT   SetMode(ZFXENGINEMODE, int n);
+	HRESULT   InitStage(float, ZFXVIEWPORT*, int n);
+	HRESULT   GetFrustrum(ZFXPlane*);
+	void      Transform2Dto3D(const POINT&, ZFXVector*, ZFXVector*);
+	POINT     Transform3Dto2D(const ZFXVector&);
 
 private:
+
+	//general
 	ZFXD3DEnum				*m_pEnum;
 	LPDIRECT3D9				m_pD3D;
 	LPDIRECT3DDEVICE9		m_pDevice;
@@ -166,6 +182,17 @@ private:
 
 	//System logging function
 	void Log(TCHAR *, ...);
+
+	//view stuff
+	D3DMATRIX	m_mView2D,			//view matrix 2D
+				m_mView3D,			//view matrix 3D
+				m_mProj2D,			//orthogonal projection for 2D
+				m_mProjP[4],		//perspective projections
+				m_mProjO[4],		//orthogonal projections
+				m_mWorld,			//world transformation
+				m_mViewProj,		//combo-matrix for 3D
+				m_mWorldViewProj;	//combo-matrix for 3D
+
 };
 
 

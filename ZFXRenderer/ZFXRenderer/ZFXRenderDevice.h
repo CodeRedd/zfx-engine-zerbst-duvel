@@ -6,6 +6,7 @@
 #include <cstdio>	//needed for the FILE struct
 
 #include "ZFXD3D\ZFX.h"
+#include "ZFX3D.h"
 
 #define ARRAY_ALLOCATION_SIZE 50
 #define MAX_3DHWND			  8
@@ -40,26 +41,43 @@ public:
 
 //Interface for the ZFX Engine 2.0 renderer. Makes the Renderer itself graphics-API-agnostic (Zerbst and Duvel use Direct3D, though, and I will as well)
 class ZFXRenderDevice
-	{
+	{	
 	//Zerbst notes that it is bad form for "hardcore" C++ to define attributes in abstract classes, but that he is less strict because he feels it's more important that
 	//the derived classes don't have a boatload of attributes
 	protected:
-		HWND		m_hWndMain;			//main window
-		HWND		m_hWnd[MAX_3DHWND];	//render window(s)
-		UINT		m_nNumWnd;			//number of render windows
-		UINT		m_nActivehWnd;		//active window
-		HINSTANCE	m_hDLL;				//DLL Module
-		DWORD		m_dwWidth;			//screen width
-		DWORD		m_dwHeight;			//screen height
-		bool		m_bWindowed;		//windowed mode?
-		TCHAR		m_chAdapter[256];	//graphics adapter name
-		FILE	*m_pLog;			//log file
-		bool		m_bRunning;			//Is the renderer running?
+
+		//init
+		HWND		m_hWndMain;				//main window
+		HWND		m_hWnd[MAX_3DHWND];		//render window(s)
+		UINT		m_nNumWnd;				//number of render windows
+		UINT		m_nActivehWnd;			//active window
+		HINSTANCE	m_hDLL;					//DLL Module
+		DWORD		m_dwWidth;				//screen width
+		DWORD		m_dwHeight;				//screen height
+		bool		m_bWindowed;			//windowed mode?
+		TCHAR		m_chAdapter[256];		//graphics adapter name
+		FILE	*m_pLog;					//log file
+		bool		m_bRunning;				//Is the renderer running?
+
+		//managers
+		ZFXSkinManager *m_pSkinMan;			// material and textures
+
+		//view stuff
+		float			m_fNear;			// near plane
+		float			m_fFar;				// far plane
+		ZFXENGINEMODE	m_Mode;				// 2D v 3D
+		int				m_nStage;			// stage type (perspective vs orthogonal)
+		ZFXVIEWPORT		m_VP[4];			// viewports
+
+		//rendering
+		bool            m_bUseShaders;       // shaders or fixed function pipeline
+
 
 	public:
-		
-		ZFXSkinManager *m_pSkinMan;   // material and textures
-		
+				
+		/////////////////////
+		// INIT STUFF
+		/////////////////////
 		ZFXRenderDevice() {};
 		//note that virtual destructor means that the correct destructor is always called regardless of what pointer is pointing here
 		virtual ~ZFXRenderDevice() {};
@@ -76,6 +94,38 @@ class ZFXRenderDevice
 		virtual void EndRendering()=0;
 		virtual HRESULT Clear(bool bClearPixel, bool bClearDepth, bool bClearStencil)=0;
 		virtual void SetClearColor(float fRed, float fGreen, float fBlue)=0;
+
+		//Manager getters
+		virtual ZFXSkinManager* GetSkinManager()=0;
+
+		/////////////////////
+		// VIEW STUFF
+		/////////////////////
+
+		//view matrix from vRight, vUp, vDir, vPos
+		virtual HRESULT SetView3D(const ZFXVector&, const ZFXVector&, const ZFXVector&, const ZFXVector&)=0;
+
+		//view matrix from position, fix point, World Up
+		virtual HRESULT SetViewLookAt(const ZFXVector&, const ZFXVector&, const ZFXVector&)=0;
+
+		//near and far clipping planes
+		virtual void SetClippingPlanes(float, float)=0;
+
+		//stage mode, 0=perspective, 1=orthogonal
+		virtual HRESULT SetMode(int, int n)=0;
+
+		//FOV and viewport for stage n
+		virtual HRESULT InitStage(float, RECT*, int n)=0;
+
+		//plane of viewing frustum
+		virtual HRESULT GetFrustum(ZFXPlane*)=0;
+
+		//screen coords to world ray
+		virtual void Transform2DTo3D(const POINT &pt, ZFXVector *vc0, ZFXVector *vcD)=0;
+
+		//world coords to screen coords
+		virtual POINT Transform3DTo2D(const ZFXVector &vcP)=0;
+
 	};
 typedef struct ZFXRenderDevice *LPZFXRENDERDEVICE;
 

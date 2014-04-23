@@ -36,6 +36,12 @@
     <ClCompile Include="ZFXD3D\ZFXD3D_skinmgr.cpp">
       <Filter>ZFXD3D</Filter>
     </ClCompile>
+    <ClCompile Include="ZFXD3D\ZFXD3D_misc.cpp">
+      <Filter>ZFXD3D</Filter>
+    </ClCompile>
+    <ClCompile Include="ZFXD3D\ZFXD3D_vcache.cpp">
+      <Filter>ZFXD3D</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ZFXRenderer.h">
@@ -55,6 +61,12 @@
     </ClInclude>
     <ClInclude Include="ZFXD3D\ZFXD3D_skinmgr.h">
       <Filter>ZFXD3D</Filter>
+    </ClInclude>
+    <ClInclude Include="ZFXD3D\ZFXD3D_vcache.h">
+      <Filter>ZFXD3D</Filter>
+    </ClInclude>
+    <ClInclude Include="ZFX3D.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
