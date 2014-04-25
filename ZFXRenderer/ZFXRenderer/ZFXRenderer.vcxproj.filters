@@ -65,9 +65,6 @@
     <ClInclude Include="ZFXD3D\ZFXD3D_vcache.h">
       <Filter>ZFXD3D</Filter>
     </ClInclude>
-    <ClInclude Include="ZFX3D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ZFXD3D\dlgChangeDevice.rc">

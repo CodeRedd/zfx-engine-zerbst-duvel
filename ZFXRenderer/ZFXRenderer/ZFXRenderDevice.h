@@ -6,7 +6,7 @@
 #include <cstdio>	//needed for the FILE struct
 
 #include "ZFXD3D\ZFX.h"
-#include "ZFX3D.h"
+#include <ZFX3D.h>
 
 #define ARRAY_ALLOCATION_SIZE 50
 #define MAX_3DHWND			  8

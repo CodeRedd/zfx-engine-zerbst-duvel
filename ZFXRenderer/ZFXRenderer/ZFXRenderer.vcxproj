@@ -75,13 +75,15 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\_Side Projects\ZFX\ZFXRenderer\ZFX3D;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>ZFX3DMath.lib,</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -147,7 +149,6 @@
     <ClCompile Include="ZFXRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ZFX3D.h" />
     <ClInclude Include="ZFXD3D\resource.h" />
     <ClInclude Include="ZFXD3D\ZFX.h" />
     <ClInclude Include="ZFXD3D\ZFXD3D.h" />
