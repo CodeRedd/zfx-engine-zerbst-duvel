@@ -112,10 +112,10 @@ class ZFXRenderDevice
 		virtual void SetClippingPlanes(float, float)=0;
 
 		//stage mode, 0=perspective, 1=orthogonal
-		virtual HRESULT SetMode(int, int n)=0;
+		virtual HRESULT SetMode(ZFXENGINEMODE, int n)=0;
 
 		//FOV and viewport for stage n
-		virtual HRESULT InitStage(float, RECT*, int n)=0;
+		virtual HRESULT InitStage(float, ZFXVIEWPORT*, int n)=0;
 
 		//plane of viewing frustum
 		virtual HRESULT GetFrustum(ZFXPlane*)=0;
@@ -125,6 +125,9 @@ class ZFXRenderDevice
 
 		//world coords to screen coords
 		virtual POINT Transform3DTo2D(const ZFXVector &vcP)=0;
+
+		// set world transformation matrix or NULL
+		virtual void SetWorldTransform(const ZFXMatrix*) = 0;
 
 	};
 typedef struct ZFXRenderDevice *LPZFXRENDERDEVICE;

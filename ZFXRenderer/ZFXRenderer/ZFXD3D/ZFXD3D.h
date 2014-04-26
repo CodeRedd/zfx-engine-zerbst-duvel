@@ -160,9 +160,11 @@ public:
 	void      SetClippingPlanes(float, float);
 	HRESULT   SetMode(ZFXENGINEMODE, int n);
 	HRESULT   InitStage(float, ZFXVIEWPORT*, int n);
-	HRESULT   GetFrustrum(ZFXPlane*);
-	void      Transform2Dto3D(const POINT&, ZFXVector*, ZFXVector*);
-	POINT     Transform3Dto2D(const ZFXVector&);
+	HRESULT   GetFrustum(ZFXPlane*);
+	void      Transform2DTo3D(const POINT&, ZFXVector*, ZFXVector*);
+	POINT     Transform3DTo2D(const ZFXVector&);
+	void      SetWorldTransform(const ZFXMatrix*);
+
 
 private:
 
@@ -192,6 +194,13 @@ private:
 				m_mWorld,			//world transformation
 				m_mViewProj,		//combo-matrix for 3D
 				m_mWorldViewProj;	//combo-matrix for 3D
+	void    Prepare2D(void);
+	//void    PrepareShaderStuff(void);
+	void    CalcViewProjMatrix(void);
+	void    CalcWorldViewProjMatrix(void);
+	HRESULT CalcPerspProjMatrix(float, float, D3DMATRIX*);
+	//void    CalcOrthoProjMatrix(float, float, float, float, float, float, int);
+
 
 };
 

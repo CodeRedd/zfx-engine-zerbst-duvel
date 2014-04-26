@@ -619,7 +619,7 @@ const TCHAR* ZFXD3DSkinManager::GetTextureName(UINT nTexID, float *pfAlpha, ZFXC
 		*pNum = m_pTextures[nTexID].dwNum;
 	}
 
-	if (m_pTextures[nTexID].pClrKeys && pAK)
+	if (m_pTextures[nTexID].pClrKeys && pAK) 
 	{
 		memcpy(pAK, m_pTextures[nTexID].pClrKeys, sizeof(ZFXCOLOR)* m_pTextures[nTexID].dwNum);
 	}
