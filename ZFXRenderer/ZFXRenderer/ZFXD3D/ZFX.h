@@ -42,6 +42,15 @@ typedef enum ZFXENGINEMODE
 	EMD_ORTHOGONAL	 //orthogonal projection
 };
 
+typedef enum ZFXVERTEXID
+{
+	VID_PS,       // untransformed position only
+	VID_UU,       // untransformed and unlit vertex
+	VID_UL,       // untransformed and lit vertex vertex
+	VID_CA,       // used for character animation
+	VID_3T,       // three texture coord pairs
+	VID_TV        // like UU but with tangent vector
+};
 
 //STRUCTS
 struct ZFXVIEWPORT
@@ -93,4 +102,45 @@ struct ZFXSKIN
 	bool	bAlpha;		//do we use non-unity alpha values?
 	UINT	nMaterial;
 	UINT	nTexture[8];//can hold up to 8 textures to support multi-pass rendering
+};
+
+// VERTEX TYPES:
+
+struct PVERTEX {
+	float	 x, y, z;
+};
+
+struct VERTEX {
+	float	 x, y, z;
+	float  vcN[3];
+	float  tu, tv;
+};
+
+struct LVERTEX {
+	float	 x, y, z;
+	DWORD  Color;
+	float  tu, tv;
+};
+
+struct CVERTEX {
+	float	 x, y, z;
+	float  vcN[3];
+	float  tu, tv;
+	float  fBone1, fWeight1;
+	float  fBone2, fWeight2;
+};
+
+struct VERTEX3T {
+	float	 x, y, z;
+	float  vcN[3];
+	float  tu0, tv0;
+	float  tu1, tv1;
+	float  tu2, tv2;
+};
+
+struct TVERTEX {
+	float	 x, y, z;
+	float  vcN[3];
+	float  tu, tv;
+	float  vcU[3];
 };

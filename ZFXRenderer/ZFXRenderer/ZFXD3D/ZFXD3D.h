@@ -10,6 +10,18 @@
 #include <D3D9.h>
 #include "..\ZFXRenderDevice.h"
 
+#define MAX_3DHWND 8
+#define MAX_SHADER 20
+
+
+//vertex type definitions
+#define FVF_VERTEX  ( D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1 )
+#define FVF_PVERTEX ( D3DFVF_XYZ )
+#define FVF_LVERTEX ( D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1 )
+#define FVF_CVERTEX ( D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1 )
+#define FVF_T3VERTEX ( D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX3 )
+#define FVF_TVERTEX ( D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1 | D3DFVF_TEXCOORDSIZE3(0) )
+
 
 //creates some macros for utility functions that should exist outside the RenderDevice interface
 //These allow us to get a pointer to something implementing ZFXRenderDevice (in the DLL) from outside the library. So this is what actually lets us use the stuff we're writing!
@@ -123,8 +135,6 @@ private:
 
 };
 
-#define MAX_3DHWND 8
-
 class ZFXD3D : public ZFXRenderDevice
 {
 public:
@@ -165,6 +175,15 @@ public:
 	POINT     Transform3DTo2D(const ZFXVector&);
 	void      SetWorldTransform(const ZFXMatrix*);
 
+	/////////////////////////
+	// SHADER FUNCTIONS
+	/////////////////////////
+	
+	HRESULT CreateVShader(const void*, UINT, bool, bool, UINT*);
+	HRESULT CreatePShader(const void*, UINT, bool, bool, UINT*);
+	HRESULT ActivateVShader(UINT, ZFXVERTEXID);
+	HRESULT ActivatePShader(UINT);
+	bool	UsesShaders() { return m_bUseShaders; }
 
 private:
 
@@ -195,13 +214,25 @@ private:
 				m_mViewProj,		//combo-matrix for 3D
 				m_mWorldViewProj;	//combo-matrix for 3D
 	void    Prepare2D(void);
-	//void    PrepareShaderStuff(void);
 	void    CalcViewProjMatrix(void);
 	void    CalcWorldViewProjMatrix(void);
 	HRESULT CalcPerspProjMatrix(float, float, D3DMATRIX*);
 	//void    CalcOrthoProjMatrix(float, float, float, float, float, float, int);
 
-
+	//shader stuff
+	LPDIRECT3DVERTEXDECLARATION9      m_pDeclVertex;   
+	LPDIRECT3DVERTEXDECLARATION9      m_pDeclPVertex;  
+	LPDIRECT3DVERTEXDECLARATION9      m_pDeclLVertex;  
+	LPDIRECT3DVERTEXDECLARATION9      m_pDeclCVertex;  
+	LPDIRECT3DVERTEXDECLARATION9      m_pDecl3TVertex; 
+	LPDIRECT3DVERTEXDECLARATION9      m_pDeclTVertex;  
+	
+	LPDIRECT3DVERTEXSHADER9		m_pVShader[MAX_SHADER];
+	LPDIRECT3DPIXELSHADER9		m_pPShader[MAX_SHADER];
+	UINT								m_nNumVShaders;
+	UINT								m_nNumPShaders;
+	
+	void    PrepareShaderStuff(void);
 };
 
 

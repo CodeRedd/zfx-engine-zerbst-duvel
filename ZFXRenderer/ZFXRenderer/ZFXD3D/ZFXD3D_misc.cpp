@@ -3,11 +3,17 @@
 //Reimplemented by Culver Redd
 
 
-#include "math.h"          // sqrt function
-#include "ZFXD3D.h"        // class definition
-#include "D3D9.h"         // shader compiler
+#include "math.h"           // sqrt function
+#include "ZFXD3D.h"         // class definition
+#include "D3D9.h"
+#include "D3DX9.h"
 
 extern bool g_bLF;
+
+
+/////////////////////////
+// VIEW FUNCTIONS
+/////////////////////////
 
 //NOTE: this must be recalculated every time the projection or view matrices are changed
 HRESULT ZFXD3D::SetView3D(const ZFXVector &vcRight, const ZFXVector &vcUp, const ZFXVector &vcDir, const ZFXVector &vcPos)
@@ -566,4 +572,365 @@ void ZFXD3D::SetWorldTransform(const ZFXMatrix *mWorld)
 	{
 		m_pDevice->SetTransform(D3DTS_WORLD, &m_mWorld);
 	}
+}
+
+/////////////////////////
+// SHADER FUNCTIONS
+/////////////////////////
+
+void ZFXD3D::PrepareShaderStuff()
+{
+	D3DCAPS9 d3dCaps;
+
+	//get hardware capabilities
+	if (FAILED(m_pDevice->GetDeviceCaps(&d3dCaps)))
+	{
+		m_bUseShaders = false;
+		return;
+	}
+
+	//we will support shader versions 2.0+ (i.e. DirectX 9.0+). We could probably support only 3.0+ (DirectX 9.0c+) but we're being generous.
+	if (d3dCaps.VertexShaderVersion < D3DVS_VERSION(2, 0))
+	{
+		m_bUseShaders = false;
+		return;
+	}
+	if (d3dCaps.PixelShaderVersion < D3DPS_VERSION(2, 0))
+	{
+		m_bUseShaders = false;
+		return;
+	}
+
+	//vertex declaration for vertex shaders
+	D3DVERTEXELEMENT9 declPVertex[] =
+	{
+		{ 0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+		D3DDECL_END()
+	};
+
+	D3DVERTEXELEMENT9 declVertex[] =
+	{
+		{ 0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+		{ 0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL, 0 },
+		{ 0, 24, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+		D3DDECL_END()
+	};
+
+	D3DVERTEXELEMENT9 declLVertex[] =
+	{
+		{ 0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+		{ 0, 12, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0 },
+		{ 0, 16, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+		D3DDECL_END()
+	};
+
+	D3DVERTEXELEMENT9 declCVertex[] =
+	{
+		{ 0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+		{ 0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL, 0 },
+		{ 0, 24, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+		{ 0, 32, D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 1 },
+		D3DDECL_END()
+	};
+
+	D3DVERTEXELEMENT9 decl3TVertex[] =
+	{
+		{ 0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+		{ 0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL, 0 },
+		{ 0, 24, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+		{ 0, 32, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 1 },
+		{ 0, 40, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 2 },
+		D3DDECL_END()
+	};
+
+	D3DVERTEXELEMENT9 declTVertex[] =
+	{
+		{ 0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+		{ 0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL, 0 },
+		{ 0, 24, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+		{ 0, 32, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TANGENT, 0 },
+		D3DDECL_END()
+	};
+
+	//create these vertex declarations
+	m_pDevice->CreateVertexDeclaration(declPVertex, &m_pDeclPVertex);
+	m_pDevice->CreateVertexDeclaration(declVertex, &m_pDeclVertex);
+	m_pDevice->CreateVertexDeclaration(declLVertex, &m_pDeclLVertex);
+	m_pDevice->CreateVertexDeclaration(declCVertex, &m_pDeclCVertex);
+	m_pDevice->CreateVertexDeclaration(decl3TVertex, &m_pDecl3TVertex);
+	m_pDevice->CreateVertexDeclaration(declTVertex, &m_pDeclTVertex);
+
+	//since we've created our own vertex declarations we don't need to use FVF
+	m_pDevice->SetFVF(NULL);
+
+	m_bUseShaders = true;
+}
+
+HRESULT ZFXD3D::CreateVShader(const void *pData, UINT nSize, bool bLoadFromFile, bool bIsCompiled, UINT *pID)
+{
+	LPD3DXBUFFER	pCode = NULL;
+	LPD3DXBUFFER	pDebug = NULL;
+	HRESULT			hrC = ZFX_OK, hrA = ZFX_OK;
+	DWORD			*pVS = NULL;
+	HANDLE			hFile = NULL, hMap = NULL;
+
+	//is there room for another shader?
+	if (m_nNumVShaders >= (MAX_SHADER - 1))
+	{
+		return ZFX_OUTOFMEMORY;
+	}
+
+	// 1. Already compiled shader
+	if (bIsCompiled)
+	{
+		//from file
+		if (bLoadFromFile)
+		{
+			hFile = CreateFile((LPCWSTR)pData, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+			if (hFile == INVALID_HANDLE_VALUE)
+			{
+				return ZFX_FILENOTFOUND;
+			}
+
+			hMap = CreateFileMapping(hFile, 0, PAGE_READONLY, 0, 0, 0);
+			pVS = (DWORD*)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
+		}
+		//from RAM pointer
+		else
+		{
+			pVS = (DWORD*)pData;
+		}
+	}
+	// 2. NEEDS TO BE COMPILED
+	else
+	{
+		//from file
+		if (bLoadFromFile)
+		{
+			hrA = D3DXAssembleShaderFromFile((TCHAR*)pData, NULL, NULL, 0, &pCode, &pDebug);
+		}
+		//from RAM pointer
+		else
+		{
+			hrA = D3DXAssembleShader((char*)pData, nSize-1, NULL, NULL, 0, &pCode, &pDebug);
+		}
+
+		//check for errors
+		if (SUCCEEDED(hrA))
+		{
+			pVS = (DWORD*)pCode->GetBufferPointer();
+		}
+		else
+		{
+			Log(L"error: AssembleShader() failed");
+			if (pDebug->GetBufferPointer())
+			{
+				Log(L"Shader debugger says: %s", (TCHAR*)pDebug->GetBufferPointer());
+			}
+			return ZFX_FAIL;
+		}
+	}
+
+	//create the shader object
+	if (FAILED(hrC = m_pDevice->CreateVertexShader(pVS, &m_pVShader[m_nNumVShaders])))
+	{
+		Log(L"error: CreateVertexShader() failed");
+		return ZFX_FAIL;
+	}
+
+	//save ID of this shader
+	if (pID)
+	{
+		(*pID) = m_nNumVShaders;
+	}
+
+	//free resources
+	if (bIsCompiled && bLoadFromFile)
+	{
+		UnmapViewOfFile(pVS);
+		CloseHandle(hMap);
+		CloseHandle(hFile);
+	}
+
+	m_nNumVShaders++;
+	return ZFX_OK;
+}
+
+HRESULT ZFXD3D::ActivateVShader(UINT nID, ZFXVERTEXID VertexID)
+{
+	//check validity of system and ID parameter
+	if (!m_bUseShaders)
+	{
+		return ZFX_NOSHADERSUPPORT;
+	}
+	if (nID >= m_nNumVShaders)
+	{
+		ZFX_INVALIDID;
+	}
+
+	//render out vertex caches
+	//m_pVertexMan->ForcedFlushAll();
+
+	//get vertex size and format
+	switch (VertexID)
+	{
+	case VID_PS:
+		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDeclPVertex)))
+		{
+			return ZFX_FAIL;
+		}
+		break;
+	case VID_UU:
+		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDeclVertex)))
+		{
+			return ZFX_FAIL;
+		}
+		break;
+	case VID_UL:
+		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDeclLVertex)))
+		{
+			return ZFX_FAIL;
+		}
+		break;
+	case VID_CA:
+		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDeclCVertex)))
+		{
+			return ZFX_FAIL;
+		}
+		break;	
+	case VID_3T:
+		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDecl3TVertex)))
+		{
+			return ZFX_FAIL;
+		}
+			break;	
+	case VID_TV:
+		if (FAILED(m_pDevice->SetVertexDeclaration(m_pDeclTVertex)))
+		{
+			return ZFX_FAIL;
+		}
+		break;
+	default:
+		return ZFX_INVALIDID;
+	}
+
+	//set the shader
+	if (FAILED(m_pDevice->SetVertexShader(m_pVShader[nID])))
+	{
+		return ZFX_FAIL;
+	}
+
+	return ZFX_OK;
+}
+
+HRESULT ZFXD3D::CreatePShader(const void *pData, UINT nSize, bool bLoadFromFile, bool bIsCompiled, UINT *pID)
+{
+	LPD3DXBUFFER	pCode = NULL;
+	LPD3DXBUFFER	pDebug = NULL;
+	HRESULT			hrC = ZFX_OK, hrA = ZFX_OK;
+	DWORD			*pVS = NULL;
+	HANDLE			hFile = NULL, hMap = NULL;
+
+	//is there room for another shader?
+	if (m_nNumPShaders >= (MAX_SHADER - 1))
+	{
+		return ZFX_OUTOFMEMORY;
+	}
+
+	// 1. Already compiled shader
+	if (bIsCompiled)
+	{
+		//from file
+		if (bLoadFromFile)
+		{
+			hFile = CreateFile((LPCWSTR)pData, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+			if (hFile == INVALID_HANDLE_VALUE)
+			{
+				return ZFX_FILENOTFOUND;
+			}
+
+			hMap = CreateFileMapping(hFile, 0, PAGE_READONLY, 0, 0, 0);
+			pVS = (DWORD*)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
+		}
+		//from RAM pointer
+		else
+		{
+			pVS = (DWORD*)pData;
+		}
+	}
+	// 2. NEEDS TO BE COMPILED
+	else
+	{
+		//from file
+		if (bLoadFromFile)
+		{
+			hrA = D3DXAssembleShaderFromFile((TCHAR*)pData, NULL, NULL, 0, &pCode, &pDebug);
+		}
+		//from RAM pointer
+		else
+		{
+			hrA = D3DXAssembleShader((char*)pData, nSize - 1, NULL, NULL, 0, &pCode, &pDebug);
+		}
+
+		//check for errors
+		if (SUCCEEDED(hrA))
+		{
+			pVS = (DWORD*)pCode->GetBufferPointer();
+		}
+		else
+		{
+			Log(L"error: AssembleShader() failed");
+			if (pDebug->GetBufferPointer())
+			{
+				Log(L"Shader debugger says: %s", (TCHAR*)pDebug->GetBufferPointer());
+			}
+			return ZFX_FAIL;
+		}
+	}
+
+	//create the shader object
+	if (FAILED(hrC = m_pDevice->CreatePixelShader(pVS, &m_pPShader[m_nNumPShaders])))
+	{
+		Log(L"error: CreatePixelShader() failed");
+		return ZFX_FAIL;
+	}
+
+	//save ID of this shader
+	if (pID)
+	{
+		(*pID) = m_nNumPShaders;
+	}
+
+	//free resources
+	if (bIsCompiled && bLoadFromFile)
+	{
+		UnmapViewOfFile(pVS);
+		CloseHandle(hMap);
+		CloseHandle(hFile);
+	}
+
+	m_nNumPShaders++;
+	return ZFX_OK;
+}
+
+HRESULT ZFXD3D::ActivatePShader(UINT nID)
+{
+	if (!m_bUseShaders)
+	{
+		return ZFX_NOSHADERSUPPORT;
+	}
+	if (nID >= m_nNumPShaders)
+	{
+		return ZFX_INVALIDID;
+	}
+
+	//render out vertex caches
+	//m_pVertexMan->ForcedFlushAll();
+
+	if (FAILED(m_pDevice->SetPixelShader(m_pPShader[nID])))
+	{
+		return ZFX_FAIL;
+	}
+
+	return ZFX_OK;
 }
