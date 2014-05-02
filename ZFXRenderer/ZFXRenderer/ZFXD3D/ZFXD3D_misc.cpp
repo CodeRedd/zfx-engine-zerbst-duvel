@@ -934,3 +934,112 @@ HRESULT ZFXD3D::ActivatePShader(UINT nID)
 
 	return ZFX_OK;
 }
+
+void ZFXD3D::SetBackfaceCulling(ZFXRENDERSTATE rs)
+{
+	//m_pVertexMan->ForcedFlushAll();
+	if (rs == RS_CULL_CW)
+	{
+		m_pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+	}
+	else if (rs == RS_CULL_CCW)
+	{
+		m_pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+	}
+	else if (rs == RS_CULL_NONE)
+	{
+		m_pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	}
+}
+
+void ZFXD3D::SetDepthBufferMode(ZFXRENDERSTATE rs)
+{
+	//m_pVertexMan->ForcedFlushAll();
+	if (rs == RS_DEPTH_READWRITE)
+	{
+		m_pDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+		m_pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+	}
+	else if (rs == RS_DEPTH_READONLY)
+	{
+		m_pDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+		m_pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+	}
+	else if (rs == RS_DEPTH_NONE)
+	{
+		m_pDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+		m_pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+	}
+}
+
+inline DWORD FtoDW(FLOAT f) { return *((DWORD*)&f); }
+
+void ZFXD3D::SetShadeMode(ZFXRENDERSTATE smd, float f, const ZFXCOLOR *pClr)
+{
+	//m_pVertexMan->ForcedFlushAll();
+
+	//copy new color if any
+	if (pClr)
+	{
+		memcpy(&m_clrWire, pClr, sizeof(ZFXCOLOR));
+		//m_pVertexMan->InvalidateStates();
+	}
+
+	//no changes in mode
+	if (smd == m_ShadeMode)
+	{
+		//but maybe a change in size?
+		if (smd == RS_SHADE_POINTS)
+		{
+			m_pDevice->SetRenderState(D3DRS_POINTSIZE, FtoDW(f));
+		}
+
+		return;
+	}
+
+	if (smd == RS_SHADE_TRIWIRE)
+	{
+		//real direct3d wireframe mode
+		m_pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+		m_ShadeMode = smd;
+	}
+	else
+	{
+		if (smd != RS_SHADE_SOLID) 
+		{
+			m_pDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
+		}
+		m_pDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
+		m_pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+		m_ShadeMode = smd;
+	}
+
+	if (smd == RS_SHADE_POINTS)
+	{
+		if (f > 0.0f)
+		{
+			m_pDevice->SetRenderState(D3DRS_POINTSPRITEENABLE, TRUE);
+			m_pDevice->SetRenderState(D3DRS_POINTSCALEENABLE, TRUE);
+			m_pDevice->SetRenderState(D3DRS_POINTSIZE, FtoDW(f));
+			m_pDevice->SetRenderState(D3DRS_POINTSIZE_MIN, FtoDW(0.00f));
+			m_pDevice->SetRenderState(D3DRS_POINTSCALE_A,  FtoDW(0.00f));
+			m_pDevice->SetRenderState(D3DRS_POINTSCALE_B,  FtoDW(0.00f));
+			m_pDevice->SetRenderState(D3DRS_POINTSCALE_C,  FtoDW(1.00f));
+		}
+		else
+		{ 
+			m_pDevice->SetRenderState(D3DRS_POINTSPRITEENABLE, FALSE);
+			m_pDevice->SetRenderState(D3DRS_POINTSCALEENABLE, FALSE);
+		}
+	}
+	else
+	{
+		m_pDevice->SetRenderState(D3DRS_POINTSPRITEENABLE, FALSE);
+		m_pDevice->SetRenderState(D3DRS_POINTSCALEENABLE, FALSE);
+	}
+
+	//update dependent states
+	//m_pVertexMan->InvalidateStates();
+}
+
+ZFXRENDERSTATE ZFXD3D::GetShadeMode() { return m_ShadeMode; }

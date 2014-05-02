@@ -52,6 +52,40 @@ typedef enum ZFXVERTEXID
 	VID_TV        // like UU but with tangent vector
 };
 
+typedef enum ZFXRENDERSTATE {
+	RS_NONE,             // just nothing
+	RS_CULL_CW,          // cull clockwise ordered triangles
+	RS_CULL_CCW,         // cull counter cw ordered triangles
+	RS_CULL_NONE,        // render front- and backsides
+	RS_DEPTH_READWRITE,  // read and write depth buffer
+	RS_DEPTH_READONLY,   // read but don't write depth buffer
+	RS_DEPTH_NONE,       // no read or write with depth buffer
+	RS_SHADE_POINTS,     // render just vertices
+	RS_SHADE_LINES,      // render two verts as one line
+	RS_SHADE_TRIWIRE,    // render triangulated wire
+	RS_SHADE_HULLWIRE,   // render poly hull as polyline
+	RS_SHADE_SOLID,      // render solid polygons
+	RS_TEX_ADDSIGNED,    // texture stage operation
+	RS_TEX_MODULATE,     // texture stage operation
+	RS_STENCIL_DISABLE,        // stencilbuffer off
+	RS_STENCIL_ENABLE,         // stencilbuffer off
+	RS_STENCIL_FUNC_ALWAYS,    // stencil pass mode
+	RS_STENCIL_FUNC_LESSEQUAL, // stencil pass mode
+	RS_STENCIL_MASK,           // stencil mask
+	RS_STENCIL_WRITEMASK,      // stencil write mask
+	RS_STENCIL_REF,            // reference value
+	RS_STENCIL_FAIL_DECR,      // stencil fail decrements
+	RS_STENCIL_FAIL_INCR,      // stencil fail increments
+	RS_STENCIL_FAIL_KEEP,      // stencil fail keeps
+	RS_STENCIL_ZFAIL_DECR,     // stencil pass but z fail decrements
+	RS_STENCIL_ZFAIL_INCR,     // stencil pass but z fail increments
+	RS_STENCIL_ZFAIL_KEEP,     // stencil pass but z fail keeps
+	RS_STENCIL_PASS_DECR,      // stencil and z pass decrements
+	RS_STENCIL_PASS_INCR,      // stencil and z pass increments
+	RS_STENCIL_PASS_KEEP,      // stencil and z pass keeps
+	RS_DEPTHBIAS               // bias value to add to depth value
+};
+
 //STRUCTS
 struct ZFXVIEWPORT
 {

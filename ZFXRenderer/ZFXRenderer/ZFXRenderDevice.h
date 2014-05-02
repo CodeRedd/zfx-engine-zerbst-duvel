@@ -71,6 +71,8 @@ class ZFXRenderDevice
 
 		//rendering
 		bool            m_bUseShaders;       // shaders or fixed function pipeline
+		ZFXRENDERSTATE  m_ShadeMode;         // wireframe rendering?
+		ZFXCOLOR        m_clrWire;           // color for wireframe rendering
 
 
 	public:
@@ -129,6 +131,15 @@ class ZFXRenderDevice
 		// set world transformation matrix or NULL
 		virtual void SetWorldTransform(const ZFXMatrix*) = 0;
 
+		/////////////////////
+		// RENDERING STUFF
+		/////////////////////
+
+		virtual void SetBackfaceCulling(ZFXRENDERSTATE)=0;
+		virtual void SetDepthBufferMode(ZFXRENDERSTATE)=0;
+
+		virtual void SetShadeMode(ZFXRENDERSTATE, float, const ZFXCOLOR*)=0;
+		virtual ZFXRENDERSTATE GetShadeMode()=0;
 	};
 typedef struct ZFXRenderDevice *LPZFXRENDERDEVICE;
 

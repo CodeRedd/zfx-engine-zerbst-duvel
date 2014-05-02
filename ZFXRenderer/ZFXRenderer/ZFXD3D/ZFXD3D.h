@@ -175,6 +175,13 @@ public:
 	POINT     Transform3DTo2D(const ZFXVector&);
 	void      SetWorldTransform(const ZFXMatrix*);
 
+	//rendering stuff
+	void			SetBackfaceCulling(ZFXRENDERSTATE);
+	void			SetDepthBufferMode(ZFXRENDERSTATE);
+
+	void			SetShadeMode(ZFXRENDERSTATE, float, const ZFXCOLOR*);
+	ZFXRENDERSTATE	GetShadeMode();
+
 	/////////////////////////
 	// SHADER FUNCTIONS
 	/////////////////////////
