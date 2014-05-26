@@ -155,6 +155,8 @@ public:
 	/////////////////////////
 
 	//general
+	UINT      GetActiveSkinID(void)     { return m_nActiveSkin; }
+	void      SetActiveSkinID(UINT nID) { m_nActiveSkin = nID; }
 	void	Release();
 	bool	IsRunning() { return m_bIsSceneRunning; }
 	HRESULT BeginRendering(bool, bool, bool);
@@ -163,6 +165,7 @@ public:
 	void	SetClearColor(float, float, float);
 	HRESULT	UseWindow(UINT nHwnd);
 	ZFXSkinManager* GetSkinManager(){ return m_pSkinMan; }
+	ZFXVertexCacheManager* GetVertexCacheManager() { return m_pVertexMan; }
 
 	//view stuff
 	HRESULT   SetView3D(const ZFXVector&, const ZFXVector&,	const ZFXVector&, const ZFXVector&);
@@ -178,7 +181,7 @@ public:
 	//rendering stuff
 	void			SetBackfaceCulling(ZFXRENDERSTATE);
 	void			SetDepthBufferMode(ZFXRENDERSTATE);
-
+	ZFXCOLOR		GetWireColor(void) { return m_clrWire; }
 	void			SetShadeMode(ZFXRENDERSTATE, float, const ZFXCOLOR*);
 	ZFXRENDERSTATE	GetShadeMode();
 
@@ -202,6 +205,7 @@ private:
 												  // level editor, etc.
 	D3DPRESENT_PARAMETERS	m_d3dpp;
 	D3DCOLOR				m_ClearColor;
+	UINT                    m_nActiveSkin;         
 	bool					m_bIsSceneRunning;
 	bool					m_bStencil;
 

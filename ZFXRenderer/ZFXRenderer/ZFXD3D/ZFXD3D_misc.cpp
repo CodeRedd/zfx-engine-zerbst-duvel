@@ -337,7 +337,7 @@ HRESULT ZFXD3D::SetMode(ZFXENGINEMODE Mode, int nStage)
 	}
 
 	//flush all cached view data prior to changing mode
-	//m_pVertexMan->ForcedFlushAll();
+	m_pVertexMan->ForcedFlushAll();
 
 	//if 2D then use 2D matrices
 	if (Mode == EMD_TWOD)
@@ -544,7 +544,7 @@ void ZFXD3D::Transform2DTo3D(const POINT &pt, ZFXVector *vcOrig, ZFXVector *vcDi
 void ZFXD3D::SetWorldTransform(const ZFXMatrix *mWorld)
 {
 	//check for cached data
-	//m_pVertexMan->ForcedFlushAll();
+	m_pVertexMan->ForcedFlushAll();
 
 	//fill class attribute
 	if (!mWorld)
@@ -769,7 +769,7 @@ HRESULT ZFXD3D::ActivateVShader(UINT nID, ZFXVERTEXID VertexID)
 	}
 
 	//render out vertex caches
-	//m_pVertexMan->ForcedFlushAll();
+	m_pVertexMan->ForcedFlushAll();
 
 	//get vertex size and format
 	switch (VertexID)
@@ -925,7 +925,7 @@ HRESULT ZFXD3D::ActivatePShader(UINT nID)
 	}
 
 	//render out vertex caches
-	//m_pVertexMan->ForcedFlushAll();
+	m_pVertexMan->ForcedFlushAll();
 
 	if (FAILED(m_pDevice->SetPixelShader(m_pPShader[nID])))
 	{
@@ -937,7 +937,7 @@ HRESULT ZFXD3D::ActivatePShader(UINT nID)
 
 void ZFXD3D::SetBackfaceCulling(ZFXRENDERSTATE rs)
 {
-	//m_pVertexMan->ForcedFlushAll();
+	m_pVertexMan->ForcedFlushAll();
 	if (rs == RS_CULL_CW)
 	{
 		m_pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
@@ -954,7 +954,7 @@ void ZFXD3D::SetBackfaceCulling(ZFXRENDERSTATE rs)
 
 void ZFXD3D::SetDepthBufferMode(ZFXRENDERSTATE rs)
 {
-	//m_pVertexMan->ForcedFlushAll();
+	m_pVertexMan->ForcedFlushAll();
 	if (rs == RS_DEPTH_READWRITE)
 	{
 		m_pDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
@@ -976,13 +976,13 @@ inline DWORD FtoDW(FLOAT f) { return *((DWORD*)&f); }
 
 void ZFXD3D::SetShadeMode(ZFXRENDERSTATE smd, float f, const ZFXCOLOR *pClr)
 {
-	//m_pVertexMan->ForcedFlushAll();
+	m_pVertexMan->ForcedFlushAll();
 
 	//copy new color if any
 	if (pClr)
 	{
 		memcpy(&m_clrWire, pClr, sizeof(ZFXCOLOR));
-		//m_pVertexMan->InvalidateStates();
+		m_pVertexMan->InvalidateStates();
 	}
 
 	//no changes in mode
@@ -1039,7 +1039,7 @@ void ZFXD3D::SetShadeMode(ZFXRENDERSTATE smd, float f, const ZFXCOLOR *pClr)
 	}
 
 	//update dependent states
-	//m_pVertexMan->InvalidateStates();
+	m_pVertexMan->InvalidateStates();
 }
 
 ZFXRENDERSTATE ZFXD3D::GetShadeMode() { return m_ShadeMode; }

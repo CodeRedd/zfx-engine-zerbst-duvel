@@ -39,6 +39,46 @@ public:
 	virtual void LogCurrentStatus(TCHAR *chLog, bool bDetail) = 0;
 };
 
+//Interface for the ZFX Engine 2.0 vertex cache manager. 
+//Note: when using Vertex Caches, we sort vertices/indices to be in a given cache according to which skin the cache is using
+class ZFXVertexCacheManager
+{
+public:
+	ZFXVertexCacheManager() {};
+	virtual ~ZFXVertexCacheManager() {};
+
+	virtual HRESULT CreateStaticBuffer(ZFXVERTEXID VertexID, UINT nSkinID, UINT nVerts, UINT nIndic, 
+		const void *pVerts, const WORD *pIndic, UINT *pnID )=0;
+	
+	virtual HRESULT CreateIndexBuffer(UINT nIndic, const WORD *pIndic, UINT *pnID)=0;
+
+	//create dynamic buffer (vertex cache) and gets ready to render with it
+	virtual HRESULT Render(ZFXVERTEXID VertexID, UINT nVerts, UINT nIndic, const void *pVerts, const WORD *pIndic, UINT SkinID)=0;
+
+	virtual HRESULT RenderNaked(UINT nVerts, const void *pVerts, bool bTextured)=0;
+
+	//render using static buffer
+	virtual HRESULT Render(UINT nSBufferID)=0;
+
+	virtual HRESULT Render(UINT SBID, UINT IBID, UINT Skin)=0;
+
+	virtual HRESULT Render(UINT nSBufferID, UINT SkinID, UINT StartIndex, UINT NumVerts, UINT NumTrims)=0;
+
+	virtual HRESULT RenderPoints(ZFXVERTEXID VertexID, UINT nVerts,	const void *pVerts, const ZFXCOLOR *pClrl)=0;
+
+	virtual HRESULT RenderLines(ZFXVERTEXID VertexID, UINT nVerts, const void *pVerts, const ZFXCOLOR *pClrl, bool bStrip)=0;
+
+	virtual HRESULT RenderLine(const float *fStart,	const float *fEnd, const ZFXCOLOR *pClr)=0;
+
+	virtual HRESULT ForcedFlushAll()=0;
+
+	virtual HRESULT ForcedFlush(ZFXVERTEXID)=0;
+
+	virtual void    InvalidateStates(void)=0;
+
+	virtual ZFXRENDERSTATE GetShadeMode(void)=0;
+};
+
 //Interface for the ZFX Engine 2.0 renderer. Makes the Renderer itself graphics-API-agnostic (Zerbst and Duvel use Direct3D, though, and I will as well)
 class ZFXRenderDevice
 	{	
@@ -61,6 +101,7 @@ class ZFXRenderDevice
 
 		//managers
 		ZFXSkinManager *m_pSkinMan;			// material and textures
+		ZFXVertexCacheManager *m_pVertexMan;// vertex cache manager
 
 		//view stuff
 		float			m_fNear;			// near plane
@@ -99,6 +140,7 @@ class ZFXRenderDevice
 
 		//Manager getters
 		virtual ZFXSkinManager* GetSkinManager()=0;
+		virtual ZFXVertexCacheManager* GetVertexCacheManager()=0;
 
 		/////////////////////
 		// VIEW STUFF

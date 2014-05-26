@@ -3,7 +3,7 @@
 //Reimplemented by Culver Redd
 
 #include <d3d9.h>
-#include "../ZFXRenderDevice.h"  // material manager base class
+#include "ZFXD3D.h"
 
 #define MAX_ID 65535
 
