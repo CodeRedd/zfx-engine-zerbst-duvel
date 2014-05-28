@@ -30,6 +30,8 @@ public:
 
 	ZFXMATERIAL	 GetMaterial(UINT nMatID);
 
+	ZFXTEXTURE	 GetTexture(UINT nTexID);
+
 	const TCHAR* GetTextureName(UINT nTexID, float *pfAlpha, ZFXCOLOR *pAK, UCHAR *pNum);
 
 	void LogCurrentStatus(TCHAR *chLog, bool bDetail);

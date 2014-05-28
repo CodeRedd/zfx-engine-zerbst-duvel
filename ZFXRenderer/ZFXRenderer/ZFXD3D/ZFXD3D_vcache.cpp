@@ -114,6 +114,463 @@ ZFXD3DVCManager::~ZFXD3DVCManager()
 	}
 }
 
+HRESULT ZFXD3DVCManager::CreateStaticBuffer(ZFXVERTEXID VertexID, UINT nSkinID, UINT nVerts, UINT nIndic, const void *pVerts,
+	const WORD *pIndic, UINT *pnID)
+{
+	HRESULT hr;
+	DWORD	dwActualFVF;
+	void	*pData;
+
+	if (m_nNumSB >= (MAX_ID - 1))
+	{
+		return ZFX_OUTOFMEMORY;
+	}
+
+	//allocate memory if needed
+	if ((m_nNumSB % ARRAY_ALLOCATION_SIZE) == 0)
+	{
+		int n = (m_nNumSB + ARRAY_ALLOCATION_SIZE)*sizeof(ZFXSTATICBUFFER);
+		m_pSB = (ZFXSTATICBUFFER*)realloc(m_pSB, n);
+		if (!m_pSB)
+		{
+			return ZFX_OUTOFMEMORY;
+		}
+	}
+
+	m_pSB[m_nNumSB].nNumVerts = nVerts;
+	m_pSB[m_nNumSB].nNumIndic = nIndic;
+	m_pSB[m_nNumSB].nSkinID   = nSkinID;
+
+	//size and format of the vertices
+	switch (VertexID)
+	{
+	case VID_PS:
+		m_pSB[m_nNumSB].nStride = sizeof(PVERTEX);
+		m_pSB[m_nNumSB].dwFVF = FVF_PVERTEX;
+		break;
+	case VID_UU:
+		m_pSB[m_nNumSB].nStride = sizeof(VERTEX);
+		m_pSB[m_nNumSB].dwFVF = FVF_VERTEX;
+		break;
+	case VID_UL:
+		m_pSB[m_nNumSB].nStride = sizeof(LVERTEX);
+		m_pSB[m_nNumSB].dwFVF = FVF_LVERTEX;
+		break;
+	case VID_CA:
+		m_pSB[m_nNumSB].nStride = sizeof(CVERTEX);
+		m_pSB[m_nNumSB].dwFVF = FVF_CVERTEX;
+		break;
+	case VID_3T:
+		m_pSB[m_nNumSB].nStride = sizeof(VERTEX3T);
+		m_pSB[m_nNumSB].dwFVF = FVF_T3VERTEX;
+		break;
+	case VID_TV:
+		m_pSB[m_nNumSB].nStride = sizeof(TVERTEX);
+		m_pSB[m_nNumSB].dwFVF = FVF_TVERTEX;
+		break;
+	default:
+		return ZFX_INVALIDID;
+	}
+
+	//create index buffer if needed
+	if (nIndic > 0)
+	{
+		m_pSB[m_nNumSB].bIndic = true;
+		m_pSB[m_nNumSB].nNumTris = int(nIndic / 3.0f);
+
+		hr = m_pDevice->CreateIndexBuffer(nIndic*sizeof(WORD), D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &m_pSB[m_nNumSB].pIB,
+										  NULL);
+
+		if (FAILED(hr))
+		{
+			return ZFX_CREATEBUFFER;
+		}
+
+		//fill the index buffer
+		if (SUCCEEDED(m_pSB[m_nNumSB].pIB->Lock(0, 0, (void**)(&pData), 0)))
+		{
+			memcpy(pData, pIndic, nIndic*sizeof(WORD));
+			m_pSB[m_nNumSB].pIB->Unlock();
+		}
+		else
+		{
+			return ZFX_BUFFERLOCK;
+		}
+	}
+	else
+	{
+		m_pSB[m_nNumSB].bIndic = true;
+		m_pSB[m_nNumSB].nNumTris = int(nVerts / 3.0f);
+		m_pSB[m_nNumSB].pIB = NULL;
+	}
+
+	//no need for FVF if we use shaders
+	if (m_pZFXD3D->UsesShaders())
+	{
+		dwActualFVF = 0;
+	}
+	else
+	{
+		dwActualFVF = m_pSB[m_nNumSB].dwFVF;
+	}
+
+	//create vertex buffer
+	hr = m_pDevice->CreateVertexBuffer(nVerts*m_pSB[m_nNumSB].nStride, D3DUSAGE_WRITEONLY, dwActualFVF, D3DPOOL_DEFAULT,
+									   &m_pSB[m_nNumSB].pVB, NULL);
+
+	if (FAILED(hr))
+	{
+		return ZFX_CREATEBUFFER;
+	}
+
+	//fill vertex buffer
+	if (SUCCEEDED(m_pSB[m_nNumSB].pVB->Lock(0, 0, (void**)(&pData), 0)))
+	{
+		memcpy(pData, pVerts, nVerts*m_pSB[m_nNumSB].nStride);
+		m_pSB[m_nNumSB].pVB->Unlock();
+	}
+	else
+	{
+		return ZFX_BUFFERLOCK;
+	}
+
+	(*pnID) = m_nNumSB;
+	m_nNumSB++;
+	return ZFX_OK;
+}
+
+ZFXRENDERSTATE ZFXD3DVCManager::GetShadeMode(void)
+{
+	return m_pZFXD3D->GetShadeMode();
+}
+
+HRESULT ZFXD3DVCManager::Render(ZFXVERTEXID VertexID, UINT nVerts, UINT nIndic, const void *pVerts, const WORD *pIndic, UINT SkinID)
+{
+	ZFXD3DVCache **pCache = NULL,
+				  *pCacheEmpty = NULL,
+				  *pCacheFullest = NULL;
+	int nEmptyVC = -1;
+	int nFullestVC = 0;
+
+	bool bShaders = m_pZFXD3D->UsesShaders();
+
+	//which vertex type?
+	switch (VertexID)
+	{
+	case VID_PS:
+		pCache = m_CachePS;
+		break;
+	case VID_UU:
+		pCache = m_CacheUU;
+		break;
+	case VID_UL:
+		pCache = m_CacheUL;
+		break;
+	case VID_CA:
+		pCache = m_CacheCA;
+		break;
+	case VID_3T:
+		pCache = m_Cache3T;
+		break;
+	case VID_TV:
+		pCache = m_CacheTV;
+		break;
+	default:
+		return ZFX_INVALIDID;
+	}
+
+	pCacheFullest = pCache[0];
+
+	//active buffer is set invalid for now
+	m_dwActiveSB = MAX_ID;
+
+	//SEARCH FOR THE MOST APPROPRIATE BUFFER
+	
+	//is there a cache with this skin?
+	for (int i = 0; i < NUM_CACHES; i++)
+	{
+		//yes, so add the data!
+		if (pCache[i]->UsesSkin(SkinID))
+		{
+			return pCache[i]->Add(nVerts, nIndic, pVerts, pIndic, bShaders);
+		}
+
+		//save the last-found empty cache
+		if (pCache[i]->IsEmpty())
+		{
+			pCacheEmpty = pCache[i];
+		}
+
+		//save the fullest cache
+		if (pCache[i]->NumVerts() > pCacheFullest->NumVerts())
+		{
+			pCacheFullest = pCache[i];
+		}
+	}
+
+	//if no cache is already using this skin, can we use an empty one?
+	if (pCacheEmpty)
+	{
+		pCacheEmpty->SetSkin(SkinID, bShaders);
+		return pCacheEmpty->Add(nVerts, nIndic, pVerts, pIndic, bShaders);
+	}
+
+	//if there are no empty caches, flush the fullest cache and use that
+	pCacheFullest->Flush(bShaders);
+	pCacheFullest->SetSkin(SkinID, bShaders);
+	return pCacheFullest->Add(nVerts, nIndic, pVerts, pIndic, bShaders);
+}
+
+//render static buffer
+HRESULT ZFXD3DVCManager::Render(UINT nID)
+{
+	HRESULT hr = ZFX_OK;
+
+	ZFXRENDERSTATE sm = m_pZFXD3D->GetShadeMode();
+
+	//active vertex cache is invalidated
+	m_dwActiveCache = MAX_ID;
+
+	//activate static buffer if not active yet
+	if (m_dwActiveSB != nID)
+	{
+		//using indices?
+		if (m_pSB[nID].bIndic)
+		{
+			m_pDevice->SetIndices(m_pSB[nID].pIB);
+		}
+
+		m_pDevice->SetStreamSource(0, m_pSB[nID].pVB, 0, m_pSB[nID].nStride);
+		m_dwActiveSB = nID;
+	}
+
+	//is the skin active?
+	if (m_pZFXD3D->GetActiveSkinID() != m_pSB[nID].nSkinID)
+	{
+		//set it active now
+		ZFXSKIN *pSkin = &m_pSkinMan->GetSkin(m_pSB[nID].nSkinID);
+
+		//Are we using wireframe mode?
+		if (sm == RS_SHADE_SOLID)
+		{
+			ZFXMATERIAL *pMat = &m_pSkinMan->GetMaterial(pSkin->nMaterial);
+			D3DMATERIAL9 mat = {
+				pMat->cDiffuse.fR, pMat->cDiffuse.fG,
+				pMat->cDiffuse.fB, pMat->cDiffuse.fA,
+				pMat->cAmbient.fR, pMat->cAmbient.fG,
+				pMat->cAmbient.fB, pMat->cAmbient.fA,
+				pMat->cSpecular.fR, pMat->cSpecular.fG,
+				pMat->cSpecular.fB, pMat->cSpecular.fA,
+				pMat->cEmissive.fR, pMat->cEmissive.fG,
+				pMat->cEmissive.fB, pMat->cEmissive.fA,
+				pMat->fPower };
+			m_pDevice->SetMaterial(&mat);
+
+			//set texture
+			for (int i = 0; i < 8; i++)
+			{
+				if (pSkin->nTexture[i] != MAX_ID)
+				{
+					m_pDevice->SetTexture(i, (LPDIRECT3DTEXTURE9)m_pSkinMan->GetTexture(pSkin->nTexture[i]).pData);
+				}
+			}
+		}
+		else
+		{
+			ZFXCOLOR clrWire = m_pZFXD3D->GetWireColor();
+
+			//set material
+			D3DMATERIAL9 matW = {
+				clrWire.fR, clrWire.fG, clrWire.fB, clrWire.fA,
+				clrWire.fR, clrWire.fG, clrWire.fB, clrWire.fA,
+				0.0f,	    0.0f,		0.0f,		1.0f,
+				0.0f,		0.0f,		0.0f,		1.0f,
+				1.0f };
+			m_pDevice->SetMaterial(&matW);
+
+			//don't use a texture
+			m_pDevice->SetTexture(0, NULL);
+		}
+
+		//set alpha states if necessary
+		if (pSkin->bAlpha)
+		{
+			m_pDevice->SetRenderState(D3DRS_ALPHAREF, 50);
+			m_pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+			m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+			m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+			m_pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+			m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+		}
+		else
+		{
+			m_pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+			m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+		}
+
+		//active skin has changed
+		m_pZFXD3D->SetActiveSkinID(m_pSB[nID].nSkinID);
+	}
+
+	//if no shader is used, activate FVF
+	if (!m_pZFXD3D->UsesShaders())
+	{
+		m_pDevice->SetFVF(m_pSB[nID].dwFVF);
+	}
+
+	//indexed primitives
+	if (m_pSB[nID].bIndic)
+	{
+		if (sm == RS_SHADE_POINTS)
+		{
+			hr = m_pDevice->DrawPrimitive(D3DPT_POINTLIST, 0, m_pSB[nID].nNumVerts);
+		}
+		else if (sm == RS_SHADE_HULLWIRE)
+		{
+			hr = m_pDevice->DrawIndexedPrimitive(D3DPT_LINESTRIP, 0, 0, m_pSB[nID].nNumVerts, 0, m_pSB[nID].nNumVerts);
+		}
+		else
+		{ //RS_SHADE_SOLID || RS_SHADE_TRIWIRE
+			hr = m_pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, m_pSB[nID].nNumVerts, 0, m_pSB[nID].nNumTris);
+		}
+	}
+	else
+	{
+		if (sm == RS_SHADE_POINTS)
+		{
+			hr = m_pDevice->DrawPrimitive(D3DPT_POINTLIST, 0, m_pSB[nID].nNumVerts);
+		}
+		else if (sm == RS_SHADE_HULLWIRE)
+		{
+			hr = m_pDevice->DrawPrimitive(D3DPT_LINESTRIP, m_pSB[nID].nNumVerts, m_pSB[nID].nNumVerts);
+		}
+		else
+		{ //RS_SHADE_SOLID || RS_SHADE_TRIWIRE
+			hr = m_pDevice->DrawPrimitive(D3DPT_TRIANGLELIST, m_pSB[nID].nNumVerts, m_pSB[nID].nNumTris);
+		}
+	}
+
+	return hr;
+}
+
+HRESULT ZFXD3DVCManager::ForcedFlush(ZFXVERTEXID VertexID)
+{
+	ZFXD3DVCache **pCache = NULL;
+	HRESULT hr = ZFX_OK;
+	int i = 0;
+
+	bool bShaders = m_pZFXD3D->UsesShaders();
+
+	switch (VertexID)
+	{
+	case VID_PS:
+		pCache = m_CachePS;
+		break;
+	case VID_UU:
+		pCache = m_CacheUU;
+		break;
+	case VID_UL:
+		pCache = m_CacheUL;
+		break;
+	case VID_CA:
+		pCache = m_CacheCA;
+		break;
+	case VID_3T:
+		pCache = m_Cache3T;
+		break;
+	case VID_TV:
+		pCache = m_CacheTV;
+		break;
+	default:
+		return ZFX_INVALIDID;
+	}
+
+	for (i = 0; i < NUM_CACHES; i++)
+	{
+		if (FAILED(pCache[i]->Flush(bShaders)))
+		{
+			hr = ZFX_FAIL;
+		}
+	}
+
+	return hr;
+}
+
+HRESULT ZFXD3DVCManager::ForcedFlushAll()
+{
+	HRESULT hr = ZFX_OK;
+	bool bShaders = m_pZFXD3D->UsesShaders();
+	int i;
+
+	for (i = 0; i < NUM_CACHES; i++)
+	{
+		if (!m_CachePS[i]->IsEmpty())
+		{
+			if (FAILED(m_CachePS[i]->Flush(bShaders)))
+			{
+				hr = ZFX_FAIL;
+			}
+		}
+	}
+
+	for (i = 0; i < NUM_CACHES; i++)
+	{
+		if (!m_CacheUU[i]->IsEmpty())
+		{
+			if (FAILED(m_CacheUU[i]->Flush(bShaders)))
+			{
+				hr = ZFX_FAIL;
+			}
+		}
+	}
+
+	for (i = 0; i < NUM_CACHES; i++)
+	{
+		if (!m_CacheUL[i]->IsEmpty())
+		{
+			if (FAILED(m_CacheUL[i]->Flush(bShaders)))
+			{
+				hr = ZFX_FAIL;
+			}
+		}
+	}
+
+	for (i = 0; i < NUM_CACHES; i++)
+	{
+		if (!m_CacheCA[i]->IsEmpty())
+		{
+			if (FAILED(m_CacheCA[i]->Flush(bShaders)))
+			{
+				hr = ZFX_FAIL;
+			}
+		}
+	}
+
+	for (i = 0; i < NUM_CACHES; i++)
+	{
+		if (!m_Cache3T[i]->IsEmpty())
+		{
+			if (FAILED(m_Cache3T[i]->Flush(bShaders)))
+			{
+				hr = ZFX_FAIL;
+			}
+		}
+	}
+
+	for (i = 0; i < NUM_CACHES; i++)
+	{
+		if (!m_CacheTV[i]->IsEmpty())
+		{
+			if (FAILED(m_CacheTV[i]->Flush(bShaders)))
+			{
+				hr = ZFX_FAIL;
+			}
+		}
+	}
+
+	return hr;
+}
+
 //////////////////
 //VERTEX CACHE
 //////////////////

@@ -603,6 +603,19 @@ ZFXMATERIAL ZFXD3DSkinManager::GetMaterial(UINT nMatID)
 	}
 }
 
+ZFXTEXTURE ZFXD3DSkinManager::GetTexture(UINT nTexID)
+{
+	if (nTexID < m_nNumTextures)
+	{
+		return m_pTextures[nTexID];
+	}
+	else
+	{
+		ZFXTEXTURE EmptyTexture = { 0 };
+		return EmptyTexture;
+	}
+}
+
 //gets alpha and color key information as well as name
 const TCHAR* ZFXD3DSkinManager::GetTextureName(UINT nTexID, float *pfAlpha, ZFXCOLOR *pAK, UCHAR *pNum)
 {

@@ -44,6 +44,8 @@ public:
 
 	HRESULT CreateStaticBuffer(ZFXVERTEXID VertexID, UINT nSkinID, UINT nVerts, UINT nIndic, const void *pVerts, const WORD *pIndic, UINT *pnID);
 
+	HRESULT CreateIndexBuffer(UINT, const WORD*, UINT*);
+
 	HRESULT Render(ZFXVERTEXID VertexID, UINT nVerts, UINT nIndic, const void *pVerts, const WORD *pIndic, UINT SkinID);
 
 	HRESULT RenderNaked(UINT, const void*, bool);
