@@ -1,1 +1,1 @@
-ProgramStartup() canceled
+error: ProgramStartup() failed

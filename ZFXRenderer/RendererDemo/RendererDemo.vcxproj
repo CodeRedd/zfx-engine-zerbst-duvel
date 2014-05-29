@@ -53,10 +53,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\_Side Projects\ZFX\ZFXRenderer\ZFX3D; C:\_Side Projects\ZFX\ZFXRenderer\ZFXRenderer;C:\_Side Projects\ZFX\ZFXRenderer\ZFXRenderer\ZFXD3D</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>C:\_Side Projects\ZFX\ZFXRenderer\Debug\ZFXRenderer.lib;C:\_Side Projects\ZFX\ZFXRenderer\Debug\ZFX3DMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

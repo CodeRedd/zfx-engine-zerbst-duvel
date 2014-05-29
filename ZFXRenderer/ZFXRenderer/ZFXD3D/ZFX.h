@@ -5,6 +5,8 @@
 //Google Code implementation by contealucard
 //I am distributing via GNU GPLv3--see License.txt for details.
 
+#pragma once 
+
 #include <Windows.h>
 
 // everything went smooth

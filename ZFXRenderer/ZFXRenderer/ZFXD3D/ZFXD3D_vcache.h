@@ -2,13 +2,17 @@
 //Created by Stefan Zerbst and Oliver Duvel
 //Reimplemented by Culver Redd
 
+#pragma once
+
 #ifndef ZFXD3D_VCACHE_H
 #define ZFXD3D_VCACHE_H
 #endif
 
 
 #include <d3d9.h>
+#include "ZFXD3D.h"
 #include "ZFXD3D_skinmgr.h"
+#include "ZFX.h"
 
 class ZFXD3DVCManager;
 class ZFXD3DVCache;

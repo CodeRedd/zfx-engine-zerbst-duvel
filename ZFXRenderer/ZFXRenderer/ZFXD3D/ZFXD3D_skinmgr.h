@@ -2,8 +2,11 @@
 //Created by Stefan Zerbst and Oliver Duvel
 //Reimplemented by Culver Redd
 
+#pragma once
+
 #include <d3d9.h>
 #include "ZFXD3D.h"
+#include "ZFX.h"
 
 #define MAX_ID 65535
 

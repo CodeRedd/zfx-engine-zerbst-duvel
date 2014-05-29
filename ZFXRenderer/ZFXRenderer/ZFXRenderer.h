@@ -1,6 +1,9 @@
 //File: ZFXRenderer.h
 //Created by Stefan Zerbst and Oliver Duvel
 //Reimplemented by Culver Redd
+
+#pragma once
+
 #include "ZFXRenderDevice.h"
 
 

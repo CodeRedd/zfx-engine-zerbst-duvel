@@ -6,10 +6,14 @@
 //Google Code implementation by contealucard
 //I am distributing via GNU GPLv3--see License.txt for details.
 
+#pragma once
+
 #include <Windows.h>
 #include <D3D9.h>
 #include <d3dx9.h>
 #include "..\ZFXRenderDevice.h"
+
+
 
 #define MAX_3DHWND 8
 #define MAX_SHADER 20

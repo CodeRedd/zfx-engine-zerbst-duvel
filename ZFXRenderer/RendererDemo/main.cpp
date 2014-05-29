@@ -6,9 +6,9 @@
 
 #include "main.h"
 #include "s3d_loader.h"
-
-//link the static library
-#pragma comment(lib, "ZFXRenderer.lib")
+#include <ZFX.h>
+#include <ZFX3D.h>
+#include <ZFXRenderer.h>
 
 //Windows global vars
 HWND		g_hWnd	= NULL;
