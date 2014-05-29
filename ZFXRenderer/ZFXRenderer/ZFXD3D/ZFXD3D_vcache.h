@@ -56,9 +56,9 @@ public:
 
 	HRESULT Render(UINT, UINT, UINT, UINT, UINT);
 
-	HRESULT RenderPoints(ZFXVERTEXID VertexID, UINT nVerts, const void *pVerts,	const ZFXCOLOR *pClrl);
+	HRESULT RenderPoints(ZFXVERTEXID VertexID, UINT nVerts, const void *pVerts,	const ZFXCOLOR *pClr);
 
-	HRESULT RenderLines(ZFXVERTEXID VertexID, UINT nVerts, const void *pVerts, const ZFXCOLOR *pClrl, bool bStrip);
+	HRESULT RenderLines(ZFXVERTEXID VertexID, UINT nVerts, const void *pVerts, const ZFXCOLOR *pClr, bool bStrip);
 
 	HRESULT RenderLine(const float *fStart,	const float *fEnd, const ZFXCOLOR *pClr);
 

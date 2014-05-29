@@ -64,9 +64,9 @@ public:
 
 	virtual HRESULT Render(UINT nSBufferID, UINT SkinID, UINT StartIndex, UINT NumVerts, UINT NumTrims)=0;
 
-	virtual HRESULT RenderPoints(ZFXVERTEXID VertexID, UINT nVerts,	const void *pVerts, const ZFXCOLOR *pClrl)=0;
+	virtual HRESULT RenderPoints(ZFXVERTEXID VertexID, UINT nVerts,	const void *pVerts, const ZFXCOLOR *pClr)=0;
 
-	virtual HRESULT RenderLines(ZFXVERTEXID VertexID, UINT nVerts, const void *pVerts, const ZFXCOLOR *pClrl, bool bStrip)=0;
+	virtual HRESULT RenderLines(ZFXVERTEXID VertexID, UINT nVerts, const void *pVerts, const ZFXCOLOR *pClr, bool bStrip)=0;
 
 	virtual HRESULT RenderLine(const float *fStart,	const float *fEnd, const ZFXCOLOR *pClr)=0;
 
@@ -112,6 +112,7 @@ class ZFXRenderDevice
 
 		//rendering
 		bool            m_bUseShaders;       // shaders or fixed function pipeline
+		bool			m_bCanDoShaders;	 // can we use shaders at all?
 		ZFXRENDERSTATE  m_ShadeMode;         // wireframe rendering?
 		ZFXCOLOR        m_clrWire;           // color for wireframe rendering
 
@@ -129,6 +130,8 @@ class ZFXRenderDevice
 		virtual HRESULT Init(HWND, const HWND*, int, int, int, bool)=0;
 		virtual void Release()=0;
 		virtual bool IsRunning()=0;
+		virtual void GetResolution(POINT*)=0;
+
 
 
 		//Renderer functions
@@ -182,6 +185,12 @@ class ZFXRenderDevice
 
 		virtual void SetShadeMode(ZFXRENDERSTATE, float, const ZFXCOLOR*)=0;
 		virtual ZFXRENDERSTATE GetShadeMode()=0;
+
+		//fonts and text
+		virtual HRESULT CreateFont(const TCHAR*, int, bool, bool, bool, DWORD, UINT*)=0;
+		virtual HRESULT DrawText(UINT, int, int, UCHAR, UCHAR, UCHAR, TCHAR*, ...)=0;
+		virtual void SetAmbientLight(float fRed, float fGreen, float fBlue) = 0;
+
 	};
 typedef struct ZFXRenderDevice *LPZFXRENDERDEVICE;
 

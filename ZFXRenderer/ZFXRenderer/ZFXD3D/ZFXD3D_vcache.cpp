@@ -453,6 +453,142 @@ HRESULT ZFXD3DVCManager::Render(UINT nID)
 	return hr;
 }
 
+HRESULT ZFXD3DVCManager::RenderPoints(ZFXVERTEXID VertexID, UINT nVerts, const void *pVerts, const ZFXCOLOR *pClr)
+{
+	D3DMATERIAL9	mtrl;
+	DWORD			dwFVF;
+	int				nStride;
+
+	//invalidate active settings
+	InvalidateStates();
+
+	memset(&mtrl, 0, sizeof(D3DMATERIAL9));
+	mtrl.Diffuse.r = mtrl.Ambient.r = pClr->fR;
+	mtrl.Diffuse.g = mtrl.Ambient.g = pClr->fG;
+	mtrl.Diffuse.b = mtrl.Ambient.b = pClr->fB;
+	mtrl.Diffuse.a = mtrl.Ambient.a = pClr->fA;
+
+	m_pDevice->SetMaterial(&mtrl);
+	m_pDevice->SetTexture(0, NULL);
+
+	//which vertex type?
+	switch (VertexID)
+	{
+	case VID_PS:
+		nStride = sizeof(PVERTEX);
+		dwFVF = FVF_PVERTEX;
+		break;
+	case VID_UU:
+		nStride = sizeof(VERTEX);
+		dwFVF = FVF_VERTEX;
+		break;
+	case VID_UL:
+		nStride = sizeof(LVERTEX);
+		dwFVF = FVF_LVERTEX;
+		break;
+	case VID_CA:
+		nStride = sizeof(CVERTEX);
+		dwFVF = FVF_CVERTEX;
+		break;
+	case VID_3T:
+		nStride = sizeof(VERTEX3T);
+		dwFVF = FVF_T3VERTEX;
+		break;
+	case VID_TV:
+		nStride = sizeof(TVERTEX);
+		dwFVF = FVF_TVERTEX;
+		break;
+	default:
+		return ZFX_INVALIDID;
+	}
+
+	//shader or FVF?
+	if (m_pZFXD3D->UsesShaders())
+	{
+		m_pZFXD3D->ActivateVShader(0, VertexID);
+		m_pZFXD3D->ActivatePShader(0);
+	}
+	else
+	{
+		m_pDevice->SetFVF(dwFVF);
+	}
+
+	//render list of points
+	if (FAILED(m_pDevice->DrawPrimitiveUP(D3DPT_POINTLIST, nVerts, pVerts, nStride)))
+	{
+		return ZFX_FAIL;
+	}
+	return ZFX_OK;
+}
+
+HRESULT ZFXD3DVCManager::RenderLines(ZFXVERTEXID VertexID, UINT nVerts, const void *pVerts, const ZFXCOLOR *pClr, bool bStrip)
+{
+	D3DMATERIAL9	mtrl;
+	DWORD			dwFVF;
+	int				nStride;
+
+	//invalidate active settings
+	InvalidateStates();
+
+	memset(&mtrl, 0, sizeof(D3DMATERIAL9));
+	mtrl.Diffuse.r = mtrl.Ambient.r = pClr->fR;
+	mtrl.Diffuse.g = mtrl.Ambient.g = pClr->fG;
+	mtrl.Diffuse.b = mtrl.Ambient.b = pClr->fB;
+	mtrl.Diffuse.a = mtrl.Ambient.a = pClr->fA;
+
+	m_pDevice->SetMaterial(&mtrl);
+	m_pDevice->SetTexture(0, NULL);
+
+	//which vertex type?
+	switch (VertexID)
+	{
+	case VID_PS:
+		nStride = sizeof(PVERTEX);
+		dwFVF = FVF_PVERTEX;
+		break;
+	case VID_UU:
+		nStride = sizeof(VERTEX);
+		dwFVF = FVF_VERTEX;
+		break;
+	case VID_UL:
+		nStride = sizeof(LVERTEX);
+		dwFVF = FVF_LVERTEX;
+		break;
+	case VID_CA:
+		nStride = sizeof(CVERTEX);
+		dwFVF = FVF_CVERTEX;
+		break;
+	case VID_3T:
+		nStride = sizeof(VERTEX3T);
+		dwFVF = FVF_T3VERTEX;
+		break;
+	case VID_TV:
+		nStride = sizeof(TVERTEX);
+		dwFVF = FVF_TVERTEX;
+		break;
+	default:
+		return ZFX_INVALIDID;
+	}
+
+	//shader or FVF?
+	if (m_pZFXD3D->UsesShaders())
+	{
+		m_pZFXD3D->ActivateVShader(0, VertexID);
+		m_pZFXD3D->ActivatePShader(0);
+	}
+	else
+	{
+		m_pDevice->SetFVF(dwFVF);
+	}
+
+	//render list of points
+	if (FAILED(m_pDevice->DrawPrimitiveUP(D3DPT_LINELIST, nVerts/2, pVerts, nStride)))
+	{
+		return ZFX_FAIL;
+	}
+	return ZFX_OK;
+}
+
 HRESULT ZFXD3DVCManager::ForcedFlush(ZFXVERTEXID VertexID)
 {
 	ZFXD3DVCache **pCache = NULL;
@@ -851,4 +987,14 @@ HRESULT ZFXD3DVCache::Flush(bool bUseShaders)
 	m_nNumVerts = 0;
 	m_nNumIndic = 0;
 	return ZFX_OK;
+}
+
+//Lets the manager know to recalculate because we've done something to invalidate the active skin, cache, and static buffer.
+//used largely when rendering points or lines
+void ZFXD3DVCManager::InvalidateStates()
+{
+	m_pZFXD3D->SetActiveSkinID(MAX_ID);
+	m_dwActiveSB = MAX_ID;
+	m_dwActiveIB = MAX_ID;
+	m_dwActiveCache = MAX_ID;
 }

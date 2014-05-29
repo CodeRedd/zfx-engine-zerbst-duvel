@@ -3,8 +3,7 @@
 //Reimplemented by Culver Redd
 
 #include "resource.h"
-
-#include "ZFXD3D.h"
+#include "ZFXD3D_vcache.h"
 
 //variables for callbacks to dialog
 ZFXDEVICEINFO	g_xDevice;
@@ -50,6 +49,8 @@ ZFXD3D::ZFXD3D(HINSTANCE hDLL)
 	m_ClearColor		= D3DCOLOR_COLORVALUE(0.0f, 0.0f, 0.0f, 1.0f);
 	m_bRunning			= false;
 	m_bIsSceneRunning	= false;
+	m_bCanDoShaders		= false;
+	m_bUseShaders		= false;
 	m_nActivehWnd		= 0;
 	
 	//Authors note that having a global var for a singleton is quick and dirty style
@@ -262,7 +263,10 @@ HRESULT ZFXD3D::Go()
 
 	m_bRunning = true;
 	m_bIsSceneRunning = false;
-	return ZFX_OK;
+	m_dwWidth = m_d3dpp.BackBufferWidth;
+	m_dwHeight = m_d3dpp.BackBufferHeight;
+
+	return OneTimeInit();
 }
 
 //Initializes the renderer and opens/processes results from the settings dialog
@@ -409,10 +413,99 @@ HRESULT ZFXD3D::InitWindowed(HWND hWnd, const HWND *hWnd3D,
 	m_dwWidth = m_d3dpp.BackBufferWidth;
 	m_dwHeight = m_d3dpp.BackBufferHeight;
 
+	return OneTimeInit();
+}
+
+HRESULT ZFXD3D::OneTimeInit()
+{
+	ZFX3DInitCPU();
+
+	m_bUseShaders = true;
+
+	m_pSkinMan = new ZFXD3DSkinManager(m_pDevice, m_pLog);
+
+	m_pVertexMan = new ZFXD3DVCManager((ZFXD3DSkinManager*)m_pSkinMan, m_pDevice, this, 3000, 4500, m_pLog);
+
+	//activate render states
+	m_pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
+	m_pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+	m_pDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+
+	//create standard material
+	memset(&m_StdMtrl, 0, sizeof(D3DMATERIAL9));
+	m_StdMtrl.Ambient.r = 1.0f;
+	m_StdMtrl.Ambient.g = 1.0f;
+	m_StdMtrl.Ambient.b = 1.0f;
+	m_StdMtrl.Ambient.a = 1.0f;
+
+	if (FAILED(m_pDevice->SetMaterial(&m_StdMtrl)))
+	{
+		Log(L"error: set material (OneTimeInit)");
+		return ZFX_FAIL;
+	}
+
+	//activate texture filtering
+	m_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+	m_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	m_pDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+
+	ZFXVIEWPORT vpView = { 0, 0, m_dwWidth, m_dwHeight };
+	m_Mode = EMD_PERSPECTIVE;
+	m_nStage = -1;
+	SetActiveSkinID(MAX_ID);
+
+	//identity matrix for view matrix
+	IDENTITY(m_mView3D);
+
+	//clipping plane values
+	SetClippingPlanes(0.1f, 1000.0f);
+
+	//init shader stuff
+	PrepareShaderStuff();
+
+	//build default shader with ID = 0
+	if (m_bUseShaders)
+	{
+		const TCHAR BaseShader[] =
+			L"vs.1.1				\n"\
+			L"dcl_position0 v0		\n"\
+			L"dcl_normal0	v3		\n"\
+			L"dcl_texcoord0 v6		\n"\
+			L"dp4 oPos.x, v0, c0	\n"\
+			L"dp4 oPos.y, v0, c1	\n"\
+			L"dp4 oPos.z, v0, c2	\n"\
+			L"dp4 oPos.w, v0, c3	\n"\
+			L"mov oD0, c4			\n"\
+			L"mov oT0, v6			\n";
+
+		if (FAILED(CreateVShader((void*)BaseShader, sizeof(BaseShader), false, false, NULL)))
+		{
+			return ZFX_FAIL;
+		}
+		if (FAILED(ActivateVShader(0, VID_UU)))
+		{
+			return ZFX_FAIL;
+		}
+	}
+
+	//set ambient light level
+	SetAmbientLight(1.0f, 1.0f, 1.0f);
+
+	//set perspective projection stage 0
+	if (FAILED(InitStage(0.8f, &vpView, 0)))
+	{
+		return ZFX_FAIL;
+	}
+
+	//activate perspective projection stage 1
+	if (FAILED(SetMode(EMD_PERSPECTIVE, 0)))
+	{
+		return ZFX_FAIL;
+	}
+
 	return ZFX_OK;
 }
 
-//from CD:
 //logging function that writes to logfile
 void ZFXD3D::Log(TCHAR *chString, ...) {
 

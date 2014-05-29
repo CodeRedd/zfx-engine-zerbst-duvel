@@ -124,3 +124,88 @@ void ZFXD3D::SetClearColor(float fRed, float fGreen, float fBlue)
 {
 	m_ClearColor = D3DCOLOR_COLORVALUE(fRed, fGreen, fBlue, 1.0f);
 }
+
+//Creates a Direct3D Font. Note: Underlines and Strikethroughs currently are unused. Why the book gave code without using these I do not know...
+HRESULT ZFXD3D::CreateFont(const TCHAR *chType, int nWeight, bool bItalic, bool bUnderline, bool bStrike, DWORD dwSize, UINT *pID)
+{
+	HRESULT hr;
+	HDC hDC;
+	int nHeight;
+
+	if (!pID)
+	{
+		return ZFX_INVALIDPARAM;
+	}
+
+	hDC = GetDC(NULL);
+	nHeight = -MulDiv(dwSize, GetDeviceCaps(hDC, LOGPIXELSY), 72);
+	ReleaseDC(NULL, hDC);
+
+	m_pFont = (LPD3DXFONT*)realloc(m_pFont, sizeof(LPD3DXFONT)*(m_nNumFonts+1));
+
+	//build D3DX font from GDI font
+	hr = D3DXCreateFont(m_pDevice,
+						nHeight, nHeight/2, //height and width
+						nWeight, // thickness: 0=default, 700=bold
+						1, //mipmaps
+						bItalic,
+						DEFAULT_CHARSET, //char set
+						OUT_DEFAULT_PRECIS, //precision
+						DEFAULT_QUALITY, //quality
+						DEFAULT_PITCH | FF_DONTCARE, //pitch and font family
+						L"Arial", //font typeface
+						&m_pFont[m_nNumFonts]); //address for new font
+
+	if (SUCCEEDED(hr))
+	{
+		(*pID) = m_nNumFonts;
+		m_nNumFonts++;
+		return ZFX_OK;
+	}
+	else
+	{
+		return ZFX_FAIL;
+	}
+}
+
+//renders text with a given font
+HRESULT ZFXD3D::DrawText(UINT nID, int x, int y, UCHAR r, UCHAR g, UCHAR b, TCHAR *ch, ...)
+{
+	RECT rc = { x, y, 0, 0 };
+	TCHAR cch[1024];
+	va_list pArgs;
+
+	//put variables into the args string
+	va_start(pArgs, ch);
+	vswprintf_s(cch, 256, ch, pArgs);
+
+	if (nID >= m_nNumFonts)
+	{
+		return ZFX_INVALIDPARAM;
+	}
+
+	//calculate size of the text
+	m_pFont[nID]->DrawText(NULL, cch, -1, &rc, DT_SINGLELINE | DT_CALCRECT, 0);
+
+	//now draw the text
+	m_pFont[nID]->DrawText(NULL, cch, -1, &rc, DT_SINGLELINE, D3DCOLOR_ARGB(255, r, g, b));
+
+	return ZFX_OK;
+}
+
+void ZFXD3D::SetAmbientLight(float fRed, float fGreen, float fBlue) {
+	// last chance check
+	m_pVertexMan->ForcedFlushAll();
+
+	int nRed = (int)(fRed * 255.0f);
+	int nGreen = (int)(fGreen * 255.0f);
+	int nBlue = (int)(fBlue * 255.0f);
+
+	if (m_bCanDoShaders) {
+		// default setting to use as diffuse vertex color
+		float fCol[4] = { fRed, fGreen, fBlue, 1.0f };
+		m_pDevice->SetVertexShaderConstantF(4, fCol, 1);
+	}
+
+	m_pDevice->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_XRGB(nRed, nGreen, nBlue));
+}

@@ -4,9 +4,8 @@
 
 #define WIN32_MEAN_AND_LEAN
 
-#include "ZFXRenderer.h"
-#include "ZFX.h"
 #include "main.h"
+#include "s3d_loader.h"
 
 //link the static library
 #pragma comment(lib, "ZFXRenderer.lib")
@@ -25,6 +24,10 @@ FILE *g_pLog		= NULL;
 LPZFXRENDERER		g_pRenderer = NULL;
 LPZFXRENDERDEVICE	g_pDevice	= NULL;
 
+//model mocks
+ZFXModel *g_pG3 = NULL,
+		 *g_pLeopard2 = NULL,
+		 *g_pMarder = NULL;
 
 //WinMain entry point
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -88,6 +91,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lpCmdLine, in
 		g_pDevice->SetClearColor(0.1f, 0.3f, 0.1f);
 	}
 
+	ZFXVector vR(1, 0, 0), vU(0, 1, 0), vD(0, 0, 1), vP(0, 0, 0);
+
 	while (!g_bDone)
 	{
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -96,13 +101,24 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lpCmdLine, in
 			DispatchMessage(&msg);
 		}
 
+		//do one frame on each window
 		if (g_bIsActive)
 		{
-			if (g_pDevice->IsRunning())
-			{
-				g_pDevice->BeginRendering(true, true, true);
-				g_pDevice->EndRendering();
-			}
+			g_pDevice->UseWindow(0);
+			g_pDevice->SetView3D(vR, vU, vD, vP);
+			ProgramTick();
+
+			g_pDevice->UseWindow(1);
+			g_pDevice->SetView3D(vU*-1, vR, vD, vP);
+			ProgramTick();
+
+			g_pDevice->UseWindow(2);
+			g_pDevice->SetView3D(vR*-1, vU*-1, vD, vP);
+			ProgramTick();
+
+			g_pDevice->UseWindow(3);
+			g_pDevice->SetView3D(vU, vR*-1, vD, vP);
+			ProgramTick();
 		}
 	}
 
@@ -207,12 +223,46 @@ HRESULT ProgramStartup(TCHAR *chAPI)
 	}
 	
 	//initialize render device (show dialog box)
-	return g_pDevice->Init(g_hWnd, hWnd3D, 4, 16, 0, false);
+	if (FAILED(g_pDevice->Init(g_hWnd, hWnd3D, 4, 16, 0, false)))
+	{
+		return E_FAIL;
+	}
+
+	//new bugfixes
+	POINT ptRes;
+	g_pDevice->GetResolution(&ptRes);
+	LONG lx = 0, ldx = 0, ldy = 0, fs = 0;
+
+	// viewport size / position
+	ldx = ptRes.x / 2.666666f;
+	ldy = ldx / 1.333333f;
+	lx = ptRes.x - ldx - 10;
+
+	// font size
+	fs = ptRes.x / 20;
+
+	//prepare viewport
+	ZFXVIEWPORT rc = { 750, 50, 480, 360 };
+	g_pDevice->InitStage(0.8f, NULL, 0);
+	g_pDevice->InitStage(0.8f, &rc, 1);
 }
 
 //Free allocated resources
 HRESULT ProgramCleanup()
 {
+	if (g_pG3) {
+		delete g_pG3;
+		g_pG3 = NULL;
+	}
+	if (g_pLeopard2) {
+		delete g_pLeopard2;
+		g_pLeopard2 = NULL;
+	}
+	if (g_pMarder) {
+		delete g_pMarder;
+		g_pMarder = NULL;
+	}
+
 	if (g_pRenderer)
 	{
 		delete g_pRenderer;
@@ -226,4 +276,55 @@ HRESULT ProgramCleanup()
 	}
 
 	return S_OK;
+}
+
+//call once each frame to render some objects
+HRESULT ProgramTick()
+{
+	ZFXMatrix mWorld;
+	mWorld.Identity();
+
+	HRESULT hr = ZFX_FAIL;
+
+	//activate first viewport
+	g_pDevice->SetMode(EMD_PERSPECTIVE, 0);
+	g_pDevice->SetClearColor(0.7f, 0.7f, 1.0f);
+
+	//clear buffer and start scene
+	g_pDevice->BeginRendering(true, true, true);
+
+	//RENDER CALLS
+
+	mWorld.Translate(-2.0f, 1.0f, 13.0f);
+	g_pDevice->SetWorldTransform(&mWorld);
+	hr = g_pMarder->Render(true, false);
+
+	mWorld.Translate(-1.0f, -5.0f, 15.0f);
+	g_pDevice->SetWorldTransform(&mWorld);
+	hr = g_pLeopard2->Render(true, false);
+
+	mWorld.Translate(1.1f, -0.6f, 4.5f);
+	g_pDevice->SetWorldTransform(&mWorld);
+	hr = g_pG3->Render(true, false);
+
+	//activate second viewport
+	g_pDevice->SetMode(EMD_PERSPECTIVE, 1);
+	g_pDevice->SetClearColor(1.0f, 0.2f, 0.2f);
+	g_pDevice->Clear(true, true, true);
+
+	// MORE RENDER CALLS
+	mWorld.Translate(-2.0f, 1.0f, 13.0f);
+	g_pDevice->SetWorldTransform(&mWorld);
+	g_pMarder->Render(true, true);
+
+	mWorld.Translate(-1.0f, -5.0f, 15.0f);
+	g_pDevice->SetWorldTransform(&mWorld);
+	g_pLeopard2->Render(true, true);
+
+	mWorld.Translate(1.1f, -0.6f, 4.5f);
+	g_pDevice->SetWorldTransform(&mWorld);
+	g_pG3->Render(true, true);
+
+	g_pDevice->EndRendering();
+	return ZFX_OK;
 }

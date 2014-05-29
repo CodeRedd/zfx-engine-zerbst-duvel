@@ -5,8 +5,8 @@
 
 #include "math.h"           // sqrt function
 #include "ZFXD3D.h"         // class definition
-#include "D3D9.h"
-#include "D3DX9.h"
+#include <D3D9.h>
+#include <D3DX9.h>
 
 extern bool g_bLF;
 
@@ -585,19 +585,19 @@ void ZFXD3D::PrepareShaderStuff()
 	//get hardware capabilities
 	if (FAILED(m_pDevice->GetDeviceCaps(&d3dCaps)))
 	{
-		m_bUseShaders = false;
+		m_bCanDoShaders = false;
 		return;
 	}
 
 	//we will support shader versions 2.0+ (i.e. DirectX 9.0+). We could probably support only 3.0+ (DirectX 9.0c+) but we're being generous.
 	if (d3dCaps.VertexShaderVersion < D3DVS_VERSION(2, 0))
 	{
-		m_bUseShaders = false;
+		m_bCanDoShaders = false;
 		return;
 	}
 	if (d3dCaps.PixelShaderVersion < D3DPS_VERSION(2, 0))
 	{
-		m_bUseShaders = false;
+		m_bCanDoShaders = false;
 		return;
 	}
 
@@ -663,7 +663,7 @@ void ZFXD3D::PrepareShaderStuff()
 	//since we've created our own vertex declarations we don't need to use FVF
 	m_pDevice->SetFVF(NULL);
 
-	m_bUseShaders = true;
+	m_bCanDoShaders = true;
 }
 
 HRESULT ZFXD3D::CreateVShader(const void *pData, UINT nSize, bool bLoadFromFile, bool bIsCompiled, UINT *pID)
@@ -759,7 +759,7 @@ HRESULT ZFXD3D::CreateVShader(const void *pData, UINT nSize, bool bLoadFromFile,
 HRESULT ZFXD3D::ActivateVShader(UINT nID, ZFXVERTEXID VertexID)
 {
 	//check validity of system and ID parameter
-	if (!m_bUseShaders)
+	if (!m_bCanDoShaders)
 	{
 		return ZFX_NOSHADERSUPPORT;
 	}
@@ -915,7 +915,7 @@ HRESULT ZFXD3D::CreatePShader(const void *pData, UINT nSize, bool bLoadFromFile,
 
 HRESULT ZFXD3D::ActivatePShader(UINT nID)
 {
-	if (!m_bUseShaders)
+	if (!m_bCanDoShaders)
 	{
 		return ZFX_NOSHADERSUPPORT;
 	}

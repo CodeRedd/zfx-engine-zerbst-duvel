@@ -8,10 +8,15 @@
 
 #include <Windows.h>
 #include <D3D9.h>
+#include <d3dx9.h>
 #include "..\ZFXRenderDevice.h"
 
 #define MAX_3DHWND 8
 #define MAX_SHADER 20
+
+
+//D3DMATRIX identity function
+#define IDENTITY(m) {memset(&m,0,sizeof(D3DMATRIX));m._11=m._22=m._33=m._44=1.0f;}
 
 
 //vertex type definitions
@@ -146,6 +151,7 @@ public:
 	//Initialize
 	HRESULT Init(HWND, const HWND*, int, int, int, bool);
 	HRESULT InitWindowed(HWND, const HWND*, int, bool);
+	HRESULT OneTimeInit();
 
 	//Pathway for graphics options UI to access DLL functions 
 	BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
@@ -159,6 +165,8 @@ public:
 	void      SetActiveSkinID(UINT nID) { m_nActiveSkin = nID; }
 	void	Release();
 	bool	IsRunning() { return m_bIsSceneRunning; }
+	void      GetResolution(POINT *pPt) { pPt->x = m_dwWidth;  pPt->y = m_dwHeight; }
+
 	HRESULT BeginRendering(bool, bool, bool);
 	HRESULT Clear(bool, bool, bool);
 	void	EndRendering();
@@ -184,16 +192,24 @@ public:
 	ZFXCOLOR		GetWireColor(void) { return m_clrWire; }
 	void			SetShadeMode(ZFXRENDERSTATE, float, const ZFXCOLOR*);
 	ZFXRENDERSTATE	GetShadeMode();
+	void			SetAmbientLight(float fRed, float fGreen, float fBlue);
 
-	/////////////////////////
-	// SHADER FUNCTIONS
-	/////////////////////////
+
+	//fonts and text
+	HRESULT CreateFont(const TCHAR*, int, bool, bool, bool, DWORD, UINT*);
+	HRESULT DrawText(UINT, int, int, UCHAR, UCHAR, UCHAR, TCHAR*, ...);
+
+	///////////////////////////
+	// RENDER/SHADER FUNCTIONS
+	///////////////////////////
 	
 	HRESULT CreateVShader(const void*, UINT, bool, bool, UINT*);
 	HRESULT CreatePShader(const void*, UINT, bool, bool, UINT*);
 	HRESULT ActivateVShader(UINT, ZFXVERTEXID);
 	HRESULT ActivatePShader(UINT);
 	bool	UsesShaders() { return m_bUseShaders; }
+	bool    CanDoShaders(void) { return m_bCanDoShaders; }
+
 
 private:
 
@@ -242,8 +258,15 @@ private:
 	LPDIRECT3DPIXELSHADER9		m_pPShader[MAX_SHADER];
 	UINT								m_nNumVShaders;
 	UINT								m_nNumPShaders;
+
+	D3DMATERIAL9						m_StdMtrl;
 	
 	void    PrepareShaderStuff(void);
+
+	//fonts and text
+	LPD3DXFONT		*m_pFont;
+	UINT			m_nNumFonts;
+
 };
 
 
