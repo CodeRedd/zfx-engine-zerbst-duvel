@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RendererDemo", "RendererDem
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFX3DMath", "ZFX3D\ZFX3D.vcxproj", "{60E22C5A-D6D3-4413-A607-85EA3478CF8F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXD3D", "ZFXRenderer\ZFXD3D\ZFXD3D.vcxproj", "{A63E73D0-E98B-4FF3-8A73-F0697F9C1706}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -37,6 +39,12 @@ Global
 		{60E22C5A-D6D3-4413-A607-85EA3478CF8F}.Release|Win32.ActiveCfg = Release|Win32
 		{60E22C5A-D6D3-4413-A607-85EA3478CF8F}.Release|Win32.Build.0 = Release|Win32
 		{60E22C5A-D6D3-4413-A607-85EA3478CF8F}.Release|x64.ActiveCfg = Release|Win32
+		{A63E73D0-E98B-4FF3-8A73-F0697F9C1706}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A63E73D0-E98B-4FF3-8A73-F0697F9C1706}.Debug|Win32.Build.0 = Debug|Win32
+		{A63E73D0-E98B-4FF3-8A73-F0697F9C1706}.Debug|x64.ActiveCfg = Debug|Win32
+		{A63E73D0-E98B-4FF3-8A73-F0697F9C1706}.Release|Win32.ActiveCfg = Release|Win32
+		{A63E73D0-E98B-4FF3-8A73-F0697F9C1706}.Release|Win32.Build.0 = Release|Win32
+		{A63E73D0-E98B-4FF3-8A73-F0697F9C1706}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -8,7 +8,7 @@
 #include <cstdio>	//needed for the FILE struct
 
 #include "ZFXD3D\ZFX.h"
-#include <ZFX3D.h>
+#include "..\ZFX3D\ZFX3D.h"
 
 #define ARRAY_ALLOCATION_SIZE 50
 #define MAX_3DHWND			  8
@@ -38,7 +38,6 @@ public:
 
 	virtual bool MaterialEqual(const ZFXMATERIAL *pMat0, const ZFXMATERIAL *pMat1) = 0;
 
-	virtual void LogCurrentStatus(TCHAR *chLog, bool bDetail) = 0;
 };
 
 //Interface for the ZFX Engine 2.0 vertex cache manager. 
@@ -52,25 +51,15 @@ public:
 	virtual HRESULT CreateStaticBuffer(ZFXVERTEXID VertexID, UINT nSkinID, UINT nVerts, UINT nIndic, 
 		const void *pVerts, const WORD *pIndic, UINT *pnID )=0;
 	
-	virtual HRESULT CreateIndexBuffer(UINT nIndic, const WORD *pIndic, UINT *pnID)=0;
-
 	//create dynamic buffer (vertex cache) and gets ready to render with it
 	virtual HRESULT Render(ZFXVERTEXID VertexID, UINT nVerts, UINT nIndic, const void *pVerts, const WORD *pIndic, UINT SkinID)=0;
 
-	virtual HRESULT RenderNaked(UINT nVerts, const void *pVerts, bool bTextured)=0;
-
 	//render using static buffer
-	virtual HRESULT Render(UINT nSBufferID)=0;
-
-	virtual HRESULT Render(UINT SBID, UINT IBID, UINT Skin)=0;
-
-	virtual HRESULT Render(UINT nSBufferID, UINT SkinID, UINT StartIndex, UINT NumVerts, UINT NumTrims)=0;
+	virtual HRESULT Render(UINT nID)=0;
 
 	virtual HRESULT RenderPoints(ZFXVERTEXID VertexID, UINT nVerts,	const void *pVerts, const ZFXCOLOR *pClr)=0;
 
 	virtual HRESULT RenderLines(ZFXVERTEXID VertexID, UINT nVerts, const void *pVerts, const ZFXCOLOR *pClr, bool bStrip)=0;
-
-	virtual HRESULT RenderLine(const float *fStart,	const float *fEnd, const ZFXCOLOR *pClr)=0;
 
 	virtual HRESULT ForcedFlushAll()=0;
 
@@ -98,7 +87,7 @@ class ZFXRenderDevice
 		DWORD		m_dwHeight;				//screen height
 		bool		m_bWindowed;			//windowed mode?
 		TCHAR		m_chAdapter[256];		//graphics adapter name
-		FILE	*m_pLog;					//log file
+		FILE		*m_pLog;					//log file
 		bool		m_bRunning;				//Is the renderer running?
 
 		//managers
@@ -185,13 +174,24 @@ class ZFXRenderDevice
 		virtual void SetBackfaceCulling(ZFXRENDERSTATE)=0;
 		virtual void SetDepthBufferMode(ZFXRENDERSTATE)=0;
 
-		virtual void SetShadeMode(ZFXRENDERSTATE, float, const ZFXCOLOR*)=0;
-		virtual ZFXRENDERSTATE GetShadeMode()=0;
-
 		//fonts and text
 		virtual HRESULT CreateFont(const TCHAR*, int, bool, bool, bool, DWORD, UINT*)=0;
 		virtual HRESULT DrawText(UINT, int, int, UCHAR, UCHAR, UCHAR, TCHAR*, ...)=0;
 		virtual void SetAmbientLight(float fRed, float fGreen, float fBlue) = 0;
+
+		virtual void SetShadeMode(ZFXRENDERSTATE, float, const ZFXCOLOR*) = 0;
+		virtual ZFXRENDERSTATE GetShadeMode() = 0;
+
+		/////////////////////
+		// SHADER STUFF
+		/////////////////////
+
+		virtual bool    UsesShaders()=0;
+		virtual bool    CanDoShaders()=0;
+		virtual HRESULT CreateVShader(const void *pData, UINT nSize, bool bLoadFromFile, bool bIsCompiled, UINT *pID)=0;
+		virtual HRESULT CreatePShader(const void *pData, UINT nSize, bool bLoadFromFile, bool bIsCompiled, UINT *pID)=0;
+		virtual HRESULT ActivateVShader(UINT id, ZFXVERTEXID VertexID)=0;
+		virtual HRESULT ActivatePShader(UINT id)=0;
 
 	};
 typedef struct ZFXRenderDevice *LPZFXRENDERDEVICE;

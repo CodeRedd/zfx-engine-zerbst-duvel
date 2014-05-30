@@ -37,8 +37,6 @@ public:
 
 	const TCHAR* GetTextureName(UINT nTexID, float *pfAlpha, ZFXCOLOR *pAK, UCHAR *pNum);
 
-	void LogCurrentStatus(TCHAR *chLog, bool bDetail);
-
 protected:
 	LPDIRECT3DDEVICE9  m_pDevice;
 	FILE			   *m_pLog;

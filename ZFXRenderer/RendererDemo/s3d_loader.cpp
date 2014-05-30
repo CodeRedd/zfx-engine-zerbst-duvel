@@ -24,7 +24,6 @@ ZFXModel::ZFXModel(const char *chFile, ZFXRenderDevice *pDevice, FILE *pLog) {
 
 	if (pFile) {
 		ReadFile();
-		fclose(m_pLog);
 		m_bReady = true;
 	}
 }
@@ -60,6 +59,7 @@ ZFXModel::~ZFXModel() {
 	}
 
 	m_bReady = false;
+	fclose(m_pLog);
 }
 
 HRESULT ZFXModel::Render(bool bStatic, bool b3T) {
@@ -132,11 +132,11 @@ void ZFXModel::ReadFile(void)
 		swscanf_s(Line, L"%f,%f,%f,%f;", &cD.fR, &cD.fG, &cD.fB, &cD.fA);              NEXT(Line);
 		swscanf_s(Line, L"%f,%f,%f,%f;", &cE.fR, &cE.fG, &cE.fB, &cE.fA);              NEXT(Line);
 		swscanf_s(Line, L"%f,%f,%f,%f,%f;", &cS.fR, &cS.fG, &cS.fB, &cS.fA, &fPower);  NEXT(Line);
-		swscanf_s(Line, L"%s", &Texture);
+		//swscanf_s(Line, L"%s", &Texture);
 
 		// add skin to skin-manager
 		m_pDevice->GetSkinManager()->AddSkin(&cA, &cD, &cE, &cS, fPower, &m_pSkins[i]);
-		m_pDevice->GetSkinManager()->AddTexture(m_pSkins[i], Texture, false, 0, NULL, 0);
+		//m_pDevice->GetSkinManager()->AddTexture(m_pSkins[i], Texture, false, 0, NULL, 0); //BUG: Causing Access Violations
 		NEXT(Line); // skip closing brag
 	}
 
@@ -266,7 +266,7 @@ int instr(const TCHAR *string, const TCHAR *substring) {
 		return -1;
 	}
 
-	memcpy(&a, &substring[0], sizeof(char));
+	memcpy(&a, &substring[0], sizeof(TCHAR));
 	nStart = wcscspn(string, &a);
 
 	while (nStart < nLng_Str) 
@@ -278,7 +278,7 @@ int instr(const TCHAR *string, const TCHAR *substring) {
 		}
 		for (j = 1; j<nLng_SubStr; j++) 
 		{
-			memcpy(&c, &substring[j], sizeof(char));
+			memcpy(&c, &substring[j], sizeof(TCHAR));
 			if (string[nStart + j] != c) 
 			{
 				break;

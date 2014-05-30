@@ -13,3 +13,4 @@ LRESULT WINAPI MsgProc(HWND, UINT, WPARAM, LPARAM);
 HRESULT ProgramStartup(TCHAR *chAPI);
 HRESULT ProgramCleanup();
 HRESULT ProgramTick();
+HRESULT	BuildAndSetShader();

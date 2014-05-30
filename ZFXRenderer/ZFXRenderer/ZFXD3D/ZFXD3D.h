@@ -11,7 +11,9 @@
 #include <Windows.h>
 #include <D3D9.h>
 #include <d3dx9.h>
-#include "..\ZFXRenderDevice.h"
+#include <ZFXRenderDevice.h>
+#include <ZFX3D.h>
+#include "ZFX.h"
 
 
 
@@ -212,7 +214,7 @@ public:
 	HRESULT ActivateVShader(UINT, ZFXVERTEXID);
 	HRESULT ActivatePShader(UINT);
 	bool	UsesShaders() { return m_bUseShaders; }
-	bool    CanDoShaders(void) { return m_bCanDoShaders; }
+	bool    CanDoShaders() { return m_bCanDoShaders; }
 
 
 private:

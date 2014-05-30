@@ -4,7 +4,7 @@
 
 #include "ZFXD3D_skinmgr.h"   // class definition
 
-extern bool g_bLF; //determines whether to flush the log file for crash safety
+bool g_bLF; //determines whether to flush the log file for crash safety
 
 //constructor
 //NOTE: The arrays for textures, skins, and materials have entry memory allocated in chunks of size MAX_ARRAY_ALLOCATION to prevent

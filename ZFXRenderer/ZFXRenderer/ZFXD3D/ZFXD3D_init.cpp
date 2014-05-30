@@ -478,14 +478,15 @@ HRESULT ZFXD3D::OneTimeInit()
 			L"mov oD0, c4			\n"\
 			L"mov oT0, v6			\n";
 
-		if (FAILED(CreateVShader((void*)BaseShader, sizeof(BaseShader), false, false, NULL)))
+		//BUG: BaseShader code fails to compile
+		/*if (FAILED(CreateVShader((void*)BaseShader, sizeof(BaseShader), false, false, NULL)))
 		{
 			return ZFX_FAIL;
 		}
 		if (FAILED(ActivateVShader(0, VID_UU)))
 		{
 			return ZFX_FAIL;
-		}
+		}*/
 	}
 
 	//set ambient light level

@@ -48,23 +48,13 @@ public:
 
 	HRESULT CreateStaticBuffer(ZFXVERTEXID VertexID, UINT nSkinID, UINT nVerts, UINT nIndic, const void *pVerts, const WORD *pIndic, UINT *pnID);
 
-	HRESULT CreateIndexBuffer(UINT, const WORD*, UINT*);
-
 	HRESULT Render(ZFXVERTEXID VertexID, UINT nVerts, UINT nIndic, const void *pVerts, const WORD *pIndic, UINT SkinID);
 
-	HRESULT RenderNaked(UINT, const void*, bool);
-
-	HRESULT Render(UINT nSBufferID);
-
-	HRESULT Render(UINT, UINT, UINT);
-
-	HRESULT Render(UINT, UINT, UINT, UINT, UINT);
+	HRESULT Render(UINT nID);
 
 	HRESULT RenderPoints(ZFXVERTEXID VertexID, UINT nVerts, const void *pVerts,	const ZFXCOLOR *pClr);
 
 	HRESULT RenderLines(ZFXVERTEXID VertexID, UINT nVerts, const void *pVerts, const ZFXCOLOR *pClr, bool bStrip);
-
-	HRESULT RenderLine(const float *fStart,	const float *fEnd, const ZFXCOLOR *pClr);
 
 	HRESULT ForcedFlushAll();
 	HRESULT ForcedFlush(ZFXVERTEXID VertexID);

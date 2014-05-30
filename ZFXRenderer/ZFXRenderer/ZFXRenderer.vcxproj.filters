@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="ZFXD3D">
-      <UniqueIdentifier>{ae091052-6fdb-472b-ac95-9a5553469d28}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -23,24 +20,6 @@
   <ItemGroup>
     <ClCompile Include="ZFXRenderer.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ZFXD3D\ZFXD3D_enum.cpp">
-      <Filter>ZFXD3D</Filter>
-    </ClCompile>
-    <ClCompile Include="ZFXD3D\ZFXD3D_init.cpp">
-      <Filter>ZFXD3D</Filter>
-    </ClCompile>
-    <ClCompile Include="ZFXD3D\ZFXD3D_main.cpp">
-      <Filter>ZFXD3D</Filter>
-    </ClCompile>
-    <ClCompile Include="ZFXD3D\ZFXD3D_skinmgr.cpp">
-      <Filter>ZFXD3D</Filter>
-    </ClCompile>
-    <ClCompile Include="ZFXD3D\ZFXD3D_misc.cpp">
-      <Filter>ZFXD3D</Filter>
-    </ClCompile>
-    <ClCompile Include="ZFXD3D\ZFXD3D_vcache.cpp">
-      <Filter>ZFXD3D</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -50,30 +29,5 @@
     <ClInclude Include="ZFXRenderDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ZFXD3D\resource.h">
-      <Filter>ZFXD3D</Filter>
-    </ClInclude>
-    <ClInclude Include="ZFXD3D\ZFX.h">
-      <Filter>ZFXD3D</Filter>
-    </ClInclude>
-    <ClInclude Include="ZFXD3D\ZFXD3D.h">
-      <Filter>ZFXD3D</Filter>
-    </ClInclude>
-    <ClInclude Include="ZFXD3D\ZFXD3D_skinmgr.h">
-      <Filter>ZFXD3D</Filter>
-    </ClInclude>
-    <ClInclude Include="ZFXD3D\ZFXD3D_vcache.h">
-      <Filter>ZFXD3D</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="ZFXD3D\dlgChangeDevice.rc">
-      <Filter>ZFXD3D</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ZFXD3D\ZFXD3D.def">
-      <Filter>ZFXD3D</Filter>
-    </None>
   </ItemGroup>
 </Project>

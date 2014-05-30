@@ -89,6 +89,16 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lpCmdLine, in
 	else
 	{
 		g_pDevice->SetClearColor(0.1f, 0.3f, 0.1f);
+
+		g_pLeopard2 = new ZFXModel("models\\leo2.s3d", g_pDevice, g_pLog);
+		g_pG3 = new ZFXModel("models\\G3.s3d", g_pDevice, g_pLog);
+		g_pMarder = new ZFXModel("models\\ma3.s3d", g_pDevice, g_pLog);
+
+		//BUG: CAUSING ACCESS VIOLATIONS
+		/*if (FAILED(BuildAndSetShader()))
+		{
+			g_bDone = true;
+		}*/
 	}
 
 	ZFXVector vR(1, 0, 0), vU(0, 1, 0), vD(0, 0, 1), vP(0, 0, 0);
@@ -109,15 +119,15 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lpCmdLine, in
 			ProgramTick();
 
 			g_pDevice->UseWindow(1);
-			g_pDevice->SetView3D(vU*-1, vR, vD, vP);
+			g_pDevice->SetView3D(vU*-1.0f, vR, vD, vP);
 			ProgramTick();
 
 			g_pDevice->UseWindow(2);
-			g_pDevice->SetView3D(vR*-1, vU*-1, vD, vP);
+			g_pDevice->SetView3D(vR*-1.0f, vU*-1.0f, vD, vP);
 			ProgramTick();
 
 			g_pDevice->UseWindow(3);
-			g_pDevice->SetView3D(vU, vR*-1, vD, vP);
+			g_pDevice->SetView3D(vU, vR*-1.0f, vD, vP);
 			ProgramTick();
 		}
 	}
@@ -326,5 +336,35 @@ HRESULT ProgramTick()
 	g_pG3->Render(true, true);
 
 	g_pDevice->EndRendering();
+	return ZFX_OK;
+}
+
+//loads some mock data
+HRESULT BuildAndSetShader(void) {
+	UINT nID = 0;
+
+	if (!g_pDevice->CanDoShaders()) return S_OK;
+
+	if (FAILED(g_pDevice->CreateVShader("test.vsh", 0, true, false, &nID))) 
+	{
+
+		return ZFX_FAIL;
+	}
+
+	if (FAILED(g_pDevice->ActivateVShader(nID, VID_UU))) 
+	{
+		return ZFX_FAIL;
+	}
+
+	if (FAILED(g_pDevice->CreatePShader("test.psh", 0, true, false, &nID)))
+	{
+		return ZFX_FAIL;
+	}
+
+	if (FAILED(g_pDevice->ActivatePShader(nID))) 
+	{
+		return ZFX_FAIL;
+	}
+
 	return ZFX_OK;
 }
