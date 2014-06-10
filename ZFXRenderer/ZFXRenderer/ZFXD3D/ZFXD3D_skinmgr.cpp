@@ -137,7 +137,7 @@ HRESULT ZFXD3DSkinManager::AddSkin(const ZFXCOLOR *pcAmbient, const ZFXCOLOR *pc
 }
 
 //add texture to a skin
-HRESULT ZFXD3DSkinManager::AddTexture(UINT nSkinID, const TCHAR *chName, bool bAlpha, float fAlpha, ZFXCOLOR *cColorKeys, DWORD dwNumColorKeys)
+HRESULT ZFXD3DSkinManager::AddTexture(UINT nSkinID, const wchar_t *chName, bool bAlpha, float fAlpha, ZFXCOLOR *cColorKeys, DWORD dwNumColorKeys)
 {
 	ZFXTEXTURE *pZFXTex = NULL;	//helper pointer
 	HRESULT hr;
@@ -194,10 +194,12 @@ HRESULT ZFXD3DSkinManager::AddTexture(UINT nSkinID, const TCHAR *chName, bool bA
 		m_pTextures[m_nNumTextures].pClrKeys = NULL;
 
 		//save texture name
-		m_pTextures[m_nNumTextures].chName = new TCHAR[wcslen(chName)+1];
-		memcpy(m_pTextures[m_nNumTextures].chName, chName, wcslen(chName)+1);
+		m_pTextures[m_nNumTextures].chName = new wchar_t[(wcslen(chName)+1)];
+		size_t n = wcslen(chName)+1;
+		memcpy(m_pTextures[m_nNumTextures].chName, chName, (wcslen(chName)+1));
 
 		//create new Direct3D texture object
+		//BUG: failing to create the texture for some reason...
 		hr = CreateTexture(&m_pTextures[m_nNumTextures], bAlpha);
 		if (FAILED(hr))
 		{
@@ -259,7 +261,7 @@ HRESULT ZFXD3DSkinManager::AddTexture(UINT nSkinID, const TCHAR *chName, bool bA
 }
 
 //add texture to a skin as a normal map
-HRESULT ZFXD3DSkinManager::AddTextureHeightMapAsBump(UINT nSkinID, const TCHAR *chName)
+HRESULT ZFXD3DSkinManager::AddTextureHeightMapAsBump(UINT nSkinID, const wchar_t *chName)
 {
 	ZFXTEXTURE *pZFXTex = NULL;	//helper pointer
 	HRESULT hr;
@@ -308,7 +310,7 @@ HRESULT ZFXD3DSkinManager::AddTextureHeightMapAsBump(UINT nSkinID, const TCHAR *
 		m_pTextures[m_nNumTextures].pClrKeys = NULL;
 
 		//save texture name
-		m_pTextures[m_nNumTextures].chName = new TCHAR[wcslen(chName) + 1];
+		m_pTextures[m_nNumTextures].chName = new wchar_t[wcslen(chName) + 1];
 		memcpy(m_pTextures[m_nNumTextures].chName, chName, wcslen(chName) + 1);
 
 		//create new Direct3D texture object
@@ -617,7 +619,7 @@ ZFXTEXTURE ZFXD3DSkinManager::GetTexture(UINT nTexID)
 }
 
 //gets alpha and color key information as well as name
-const TCHAR* ZFXD3DSkinManager::GetTextureName(UINT nTexID, float *pfAlpha, ZFXCOLOR *pAK, UCHAR *pNum)
+const wchar_t* ZFXD3DSkinManager::GetTextureName(UINT nTexID, float *pfAlpha, ZFXCOLOR *pAK, UCHAR *pNum)
 {
 	if (nTexID >= m_nNumTextures)
 	{
@@ -641,9 +643,9 @@ const TCHAR* ZFXD3DSkinManager::GetTextureName(UINT nTexID, float *pfAlpha, ZFXC
 }
 
 //write data out to log file
-void ZFXD3DSkinManager::Log(TCHAR *chString, ...)
+void ZFXD3DSkinManager::Log(wchar_t *chString, ...)
 {
-	TCHAR ch[256];
+	wchar_t ch[256];
 	va_list pArgs;
 
 	va_start(pArgs, chString);

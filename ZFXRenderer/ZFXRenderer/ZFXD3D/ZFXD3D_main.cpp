@@ -126,7 +126,7 @@ void ZFXD3D::SetClearColor(float fRed, float fGreen, float fBlue)
 }
 
 //Creates a Direct3D Font. Note: Underlines and Strikethroughs currently are unused. Why the book gave code without using these I do not know...
-HRESULT ZFXD3D::CreateFont(const TCHAR *chType, int nWeight, bool bItalic, bool bUnderline, bool bStrike, DWORD dwSize, UINT *pID)
+HRESULT ZFXD3D::CreateFont(const wchar_t *chType, int nWeight, bool bItalic, bool bUnderline, bool bStrike, DWORD dwSize, UINT *pID)
 {
 	HRESULT hr;
 	HDC hDC;
@@ -169,10 +169,10 @@ HRESULT ZFXD3D::CreateFont(const TCHAR *chType, int nWeight, bool bItalic, bool 
 }
 
 //renders text with a given font
-HRESULT ZFXD3D::DrawText(UINT nID, int x, int y, UCHAR r, UCHAR g, UCHAR b, TCHAR *ch, ...)
+HRESULT ZFXD3D::DrawText(UINT nID, int x, int y, UCHAR r, UCHAR g, UCHAR b, wchar_t *ch, ...)
 {
 	RECT rc = { x, y, 0, 0 };
-	TCHAR cch[1024];
+	wchar_t cch[1024];
 	va_list pArgs;
 
 	//put variables into the args string
@@ -193,7 +193,8 @@ HRESULT ZFXD3D::DrawText(UINT nID, int x, int y, UCHAR r, UCHAR g, UCHAR b, TCHA
 	return ZFX_OK;
 }
 
-void ZFXD3D::SetAmbientLight(float fRed, float fGreen, float fBlue) {
+void ZFXD3D::SetAmbientLight(float fRed, float fGreen, float fBlue)
+{
 	// last chance check
 	m_pVertexMan->ForcedFlushAll();
 
@@ -201,7 +202,8 @@ void ZFXD3D::SetAmbientLight(float fRed, float fGreen, float fBlue) {
 	int nGreen = (int)(fGreen * 255.0f);
 	int nBlue = (int)(fBlue * 255.0f);
 
-	if (m_bCanDoShaders) {
+	if (m_bCanDoShaders)
+	{
 		// default setting to use as diffuse vertex color
 		float fCol[4] = { fRed, fGreen, fBlue, 1.0f };
 		m_pDevice->SetVertexShaderConstantF(4, fCol, 1);

@@ -33,7 +33,7 @@ public:
 	virtual HRESULT AddSkin(const ZFXCOLOR *pcAmbient, const ZFXCOLOR *pcDiffuse, const ZFXCOLOR *pcEmissive,
 		const ZFXCOLOR *pcSpecular, float fSpecPower, UINT *nSkinID) = 0;
 
-	virtual HRESULT AddTexture(UINT nSkinID, const TCHAR *chName, bool bAlpha, float fAlpha,
+	virtual HRESULT AddTexture(UINT nSkinID, const wchar_t *chName, bool bAlpha, float fAlpha,
 		ZFXCOLOR *cColorKeys, DWORD dwNumColorKeys) = 0;
 
 	virtual bool MaterialEqual(const ZFXMATERIAL *pMat0, const ZFXMATERIAL *pMat1) = 0;
@@ -86,7 +86,7 @@ class ZFXRenderDevice
 		DWORD		m_dwWidth;				//screen width
 		DWORD		m_dwHeight;				//screen height
 		bool		m_bWindowed;			//windowed mode?
-		TCHAR		m_chAdapter[256];		//graphics adapter name
+		wchar_t		m_chAdapter[256];		//graphics adapter name
 		FILE		*m_pLog;					//log file
 		bool		m_bRunning;				//Is the renderer running?
 
@@ -175,8 +175,8 @@ class ZFXRenderDevice
 		virtual void SetDepthBufferMode(ZFXRENDERSTATE)=0;
 
 		//fonts and text
-		virtual HRESULT CreateFont(const TCHAR*, int, bool, bool, bool, DWORD, UINT*)=0;
-		virtual HRESULT DrawText(UINT, int, int, UCHAR, UCHAR, UCHAR, TCHAR*, ...)=0;
+		virtual HRESULT CreateFont(const wchar_t*, int, bool, bool, bool, DWORD, UINT*)=0;
+		virtual HRESULT DrawText(UINT, int, int, UCHAR, UCHAR, UCHAR, wchar_t*, ...)=0;
 		virtual void SetAmbientLight(float fRed, float fGreen, float fBlue) = 0;
 
 		virtual void SetShadeMode(ZFXRENDERSTATE, float, const ZFXCOLOR*) = 0;
@@ -187,12 +187,14 @@ class ZFXRenderDevice
 		/////////////////////
 
 		virtual bool    UsesShaders()=0;
+		virtual void	UsesShaders(bool)=0;
 		virtual bool    CanDoShaders()=0;
+		virtual void	CanDoShaders(bool)=0;
 		virtual HRESULT CreateVShader(const void *pData, UINT nSize, bool bLoadFromFile, bool bIsCompiled, UINT *pID)=0;
 		virtual HRESULT CreatePShader(const void *pData, UINT nSize, bool bLoadFromFile, bool bIsCompiled, UINT *pID)=0;
 		virtual HRESULT ActivateVShader(UINT id, ZFXVERTEXID VertexID)=0;
 		virtual HRESULT ActivatePShader(UINT id)=0;
-
+		virtual HRESULT SetShaderConstant(ZFXSHADERTYPE, ZFXDATATYPE, UINT, UINT, const void*)=0;
 	};
 typedef struct ZFXRenderDevice *LPZFXRENDERDEVICE;
 

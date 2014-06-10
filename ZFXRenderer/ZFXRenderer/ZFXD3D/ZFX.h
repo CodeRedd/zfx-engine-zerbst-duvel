@@ -88,6 +88,18 @@ typedef enum ZFXRENDERSTATE {
 	RS_DEPTHBIAS               // bias value to add to depth value
 };
 
+// data types
+enum ZFXDATATYPE {
+	DAT_BOOL,          // boolean
+	DAT_INT,           // integer
+	DAT_FLOAT          // floating point
+};
+
+enum ZFXSHADERTYPE {
+	SHT_VERTEX,
+	SHT_PIXEL
+};
+
 //STRUCTS
 struct ZFXVIEWPORT
 {
@@ -127,7 +139,7 @@ struct ZFXMATERIAL
 struct ZFXTEXTURE
 {
 	float		fAlpha;		//transparency
-	TCHAR		*chName;	//texture filename--also used as ID for texture so that we don't load the same file more than once
+	wchar_t		*chName;	//texture filename--also used as ID for texture so that we don't load the same file more than once
 	void		*pData;		//texture data
 	ZFXCOLOR	*pClrKeys;	//color key array -- adjust an RGB color to a specific alpha value
 	DWORD		dwNum;		//number of color keys

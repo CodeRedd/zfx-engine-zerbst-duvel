@@ -46,5 +46,5 @@ public:
 };
 #define SEEK(str, key) while (instr(str,key)==-1){ fgetws(str,80,m_pFile);}
 #define NEXT(str) fgetws(str,80, m_pFile);
-int instr(const TCHAR *string, const TCHAR *substring);
+int instr(const wchar_t *string, const wchar_t *substring);
 

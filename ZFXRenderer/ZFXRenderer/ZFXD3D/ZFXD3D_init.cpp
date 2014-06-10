@@ -464,13 +464,13 @@ HRESULT ZFXD3D::OneTimeInit()
 	PrepareShaderStuff();
 
 	//build default shader with ID = 0
-	if (m_bUseShaders)
+	/*if (m_bUseShaders) BUG: Default shader fails to compile
 	{
-		const TCHAR BaseShader[] =
+		const wchar_t BaseShader[] =
 			L"vs.1.1				\n"\
-			L"dcl_position0 v0		\n"\
-			L"dcl_normal0	v3		\n"\
-			L"dcl_texcoord0 v6		\n"\
+			L"dcl_position  v0		\n"\
+			L"dcl_normal	v3		\n"\
+			L"dcl_texcoord  v6		\n"\
 			L"dp4 oPos.x, v0, c0	\n"\
 			L"dp4 oPos.y, v0, c1	\n"\
 			L"dp4 oPos.z, v0, c2	\n"\
@@ -478,16 +478,15 @@ HRESULT ZFXD3D::OneTimeInit()
 			L"mov oD0, c4			\n"\
 			L"mov oT0, v6			\n";
 
-		//BUG: BaseShader code fails to compile
-		/*if (FAILED(CreateVShader((void*)BaseShader, sizeof(BaseShader), false, false, NULL)))
+		if (FAILED(CreateVShader((void*)BaseShader, sizeof(BaseShader), false, false, NULL)))
 		{
 			return ZFX_FAIL;
 		}
 		if (FAILED(ActivateVShader(0, VID_UU)))
 		{
 			return ZFX_FAIL;
-		}*/
-	}
+		}
+	}*/
 
 	//set ambient light level
 	SetAmbientLight(1.0f, 1.0f, 1.0f);
@@ -508,9 +507,9 @@ HRESULT ZFXD3D::OneTimeInit()
 }
 
 //logging function that writes to logfile
-void ZFXD3D::Log(TCHAR *chString, ...) {
+void ZFXD3D::Log(wchar_t *chString, ...) {
 
-	TCHAR ch[256];
+	wchar_t ch[256];
 	va_list pArgs;
 
 	va_start(pArgs, chString);

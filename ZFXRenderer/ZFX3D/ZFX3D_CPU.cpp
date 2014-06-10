@@ -21,7 +21,7 @@ bool ZFX3DInitCPU()
 CPUINFO GetCPUInfo()
 {
 	CPUINFO info;
-	TCHAR *pStr = info.vendor;
+	wchar_t *pStr = info.vendor;
 	int n = 1;
 	int *pn = &n;
 
@@ -97,7 +97,7 @@ CPUINFO GetCPUInfo()
 				mov[esi], ebx
 		}
 		int m = 0;
-		memcpy(&m, pn, sizeof(TCHAR)); //copy only the lower 8 bits
+		memcpy(&m, pn, sizeof(wchar_t)); //copy only the lower 8 bits
 		n = m;
 	}
 	else if (wcsncmp(info.vendor, L"AuthenticAMD", 12) == 0 && info.bEXT)
@@ -143,7 +143,7 @@ CPUINFO GetCPUInfo()
 * accurate in some cases. Never use in official release.
 * TODO: Will have to update this with modern processor names
 */
-void GetCPUName(TCHAR *chName, int n, const TCHAR *vendor)
+void GetCPUName(wchar_t *chName, int n, const wchar_t *vendor)
 {
 	// Intel processors
 	if (wcsncmp(vendor, L"GenuineIntel", 12) == 0) {

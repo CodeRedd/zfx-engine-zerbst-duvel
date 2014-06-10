@@ -707,7 +707,7 @@ HRESULT ZFXD3D::CreateVShader(const void *pData, UINT nSize, bool bLoadFromFile,
 		//from file
 		if (bLoadFromFile)
 		{
-			hrA = D3DXAssembleShaderFromFile((TCHAR*)pData, NULL, NULL, 0, &pCode, &pDebug);
+			hrA = D3DXAssembleShaderFromFile((wchar_t*)pData, NULL, NULL, 0, &pCode, &pDebug);
 		}
 		//from RAM pointer
 		else
@@ -716,6 +716,7 @@ HRESULT ZFXD3D::CreateVShader(const void *pData, UINT nSize, bool bLoadFromFile,
 		}
 
 		//check for errors
+		//BUG: D3DX is failing to assemble our shaders
 		if (SUCCEEDED(hrA))
 		{
 			pVS = (DWORD*)pCode->GetBufferPointer();
@@ -723,9 +724,9 @@ HRESULT ZFXD3D::CreateVShader(const void *pData, UINT nSize, bool bLoadFromFile,
 		else
 		{
 			Log(L"error: AssembleShader() failed");
-			if (pDebug->GetBufferPointer())
+			if (pDebug && pDebug->GetBufferPointer())
 			{
-				Log(L"Shader debugger says: %s", (TCHAR*)pDebug->GetBufferPointer());
+				Log(L"Shader debugger says: %s", (wchar_t*)pDebug->GetBufferPointer());
 			}
 			return ZFX_FAIL;
 		}
@@ -864,7 +865,7 @@ HRESULT ZFXD3D::CreatePShader(const void *pData, UINT nSize, bool bLoadFromFile,
 		//from file
 		if (bLoadFromFile)
 		{
-			hrA = D3DXAssembleShaderFromFile((TCHAR*)pData, NULL, NULL, 0, &pCode, &pDebug);
+			hrA = D3DXAssembleShaderFromFile((wchar_t*)pData, NULL, NULL, 0, &pCode, &pDebug);
 		}
 		//from RAM pointer
 		else
@@ -882,7 +883,7 @@ HRESULT ZFXD3D::CreatePShader(const void *pData, UINT nSize, bool bLoadFromFile,
 			Log(L"error: AssembleShader() failed");
 			if (pDebug->GetBufferPointer())
 			{
-				Log(L"Shader debugger says: %s", (TCHAR*)pDebug->GetBufferPointer());
+				Log(L"Shader debugger says: %s", (wchar_t*)pDebug->GetBufferPointer());
 			}
 			return ZFX_FAIL;
 		}
@@ -932,6 +933,55 @@ HRESULT ZFXD3D::ActivatePShader(UINT nID)
 		return ZFX_FAIL;
 	}
 
+	return ZFX_OK;
+}
+
+HRESULT ZFXD3D::SetShaderConstant(ZFXSHADERTYPE sht, ZFXDATATYPE dat, UINT nReg, UINT nNum, const void *pData) 
+{
+	if (!m_bCanDoShaders)
+	{
+		return ZFX_NOSHADERSUPPORT;
+	}
+
+	if (sht == SHT_VERTEX) 
+	{
+		if (nReg < 20) 
+		{
+			return ZFX_INVALIDPARAM;
+		}
+
+		switch (dat)
+		{
+		case DAT_BOOL:
+			m_pDevice->SetVertexShaderConstantB(nReg, (BOOL*)pData, nNum);
+			break;
+		case DAT_INT:
+			m_pDevice->SetVertexShaderConstantI(nReg, (int*)pData, nNum);
+			break;
+		case DAT_FLOAT:
+			m_pDevice->SetVertexShaderConstantF(nReg, (float*)pData, nNum);
+			break;
+		default: 
+			return ZFX_FAIL;
+		} // switch
+	}
+	else 
+	{
+		switch (dat) 
+		{
+		case DAT_BOOL:
+			m_pDevice->SetPixelShaderConstantB(nReg, (BOOL*)pData, nNum);
+			break;
+		case DAT_INT:
+			m_pDevice->SetPixelShaderConstantI(nReg, (int*)pData, nNum);
+			break;
+		case DAT_FLOAT:
+			m_pDevice->SetPixelShaderConstantF(nReg, (float*)pData, nNum);
+			break;
+		default: 
+			return ZFX_FAIL;
+		} // switch
+	}
 	return ZFX_OK;
 }
 

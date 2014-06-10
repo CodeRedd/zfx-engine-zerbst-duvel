@@ -110,7 +110,7 @@ HRESULT ZFXD3DEnum::Enum(HWND hAdapter, HWND hMode,
 	SendMessage(m_hADAPTER, CB_RESETCONTENT, 0, 0);
 
 	// create a temp variable so we can use tchar instead of char
-	TCHAR* w_description = 0;
+	wchar_t* w_description = 0;
 	for (UINT a = 0; a<m_dwNumAdapters; a++) {
 		USES_CONVERSION;
 		w_description = A2W(m_xAdapterInfo[a].d3dAdapterIdentifier.Description);
@@ -141,15 +141,15 @@ void* ZFXD3DEnum::GetSelectedItem(HWND hWnd) {
 }
 /*----------------------------------------------------------------*/
 
-void ZFXD3DEnum::AddItem(HWND hWnd, TCHAR *ch, void *pData) {
+void ZFXD3DEnum::AddItem(HWND hWnd, wchar_t *ch, void *pData) {
 	WPARAM nI = (WPARAM)((int)(DWORD)SendMessage(hWnd, CB_ADDSTRING, 0, (LPARAM)ch));
 	SendMessage(hWnd, CB_SETITEMDATA, nI, (LPARAM)pData);
 }
 /*----------------------------------------------------------------*/
 
-bool ZFXD3DEnum::ContainsString(HWND hWnd, TCHAR *ch) {
+bool ZFXD3DEnum::ContainsString(HWND hWnd, wchar_t *ch) {
 	int n = (int)SendMessage(hWnd, CB_GETCOUNT, 0, 0);
-	TCHAR buffer[200];
+	wchar_t buffer[200];
 
 	for (int nIndex = 0; nIndex<n; nIndex++) {
 		SendMessage(hWnd, CB_GETLBTEXT, (WPARAM)nIndex, (LPARAM)buffer);
@@ -305,7 +305,7 @@ void ZFXD3DEnum::ChangedAdapterFmt(void) {
 	ZFXCOMBOINFO   *pC = NULL;
 	D3DDISPLAYMODE *dpsmd = NULL;
 	D3DFORMAT      *pFmt = NULL;
-	TCHAR            buffer[200];
+	wchar_t            buffer[200];
 	bool            bWindowed;
 
 	pA = (ZFXADAPTERINFO *)GetSelectedItem(m_hADAPTER);
@@ -680,7 +680,7 @@ UINT ZFXD3DEnum::GetBits(D3DFORMAT fmt) {
 /*----------------------------------------------------------------*/
 
 
-TCHAR* ZFXD3DEnum::D3DDevTypeToString(D3DDEVTYPE devType) {
+wchar_t* ZFXD3DEnum::D3DDevTypeToString(D3DDEVTYPE devType) {
 	switch (devType) {
 	case D3DDEVTYPE_HAL:    return TEXT("D3DDEVTYPE_HAL");
 	case D3DDEVTYPE_SW:     return TEXT("D3DDEVTYPE_SW");
@@ -691,7 +691,7 @@ TCHAR* ZFXD3DEnum::D3DDevTypeToString(D3DDEVTYPE devType) {
 /*----------------------------------------------------------------*/
 
 
-TCHAR* ZFXD3DEnum::D3DFormatToString(D3DFORMAT format) {
+wchar_t* ZFXD3DEnum::D3DFormatToString(D3DFORMAT format) {
 	switch (format) {
 	case D3DFMT_UNKNOWN:         return TEXT("D3DFMT_UNKNOWN");
 	case D3DFMT_R8G8B8:          return TEXT("D3DFMT_R8G8B8");
@@ -721,7 +721,7 @@ TCHAR* ZFXD3DEnum::D3DFormatToString(D3DFORMAT format) {
 /*----------------------------------------------------------------*/
 
 
-TCHAR* ZFXD3DEnum::BehaviorTypeToString(DWORD vpt) {
+wchar_t* ZFXD3DEnum::BehaviorTypeToString(DWORD vpt) {
 	switch (vpt) {
 	case D3DCREATE_SOFTWARE_VERTEXPROCESSING: return TEXT("SOFTWARE_VP");
 	case D3DCREATE_MIXED_VERTEXPROCESSING:    return TEXT("MIXED_VP");

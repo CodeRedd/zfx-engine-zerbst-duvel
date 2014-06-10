@@ -115,8 +115,8 @@ void ZFXModel::ReadFile(void)
 	UINT     i, nNumFaces, nNumTris = 0;
 	float    fPower = 0;
 	
-	TCHAR	  Line[80];
-	TCHAR     Texture[80];
+	wchar_t	  Line[80];
+	wchar_t     Texture[80];
 	TRI     *pTris = NULL;
 
 
@@ -136,7 +136,7 @@ void ZFXModel::ReadFile(void)
 
 		// add skin to skin-manager
 		m_pDevice->GetSkinManager()->AddSkin(&cA, &cD, &cE, &cS, fPower, &m_pSkins[i]);
-		//m_pDevice->GetSkinManager()->AddTexture(m_pSkins[i], Texture, false, 0, NULL, 0); //BUG: Causing Access Violations
+		m_pDevice->GetSkinManager()->AddTexture(m_pSkins[i], Texture, false, 0, NULL, 0); //BUG: Causing Access Violations
 		NEXT(Line); // skip closing brag
 	}
 
@@ -254,8 +254,8 @@ int SortTris(const TRI *arg1, const TRI *arg2) {
 	}
 }
 
-int instr(const TCHAR *string, const TCHAR *substring) {
-	TCHAR a, c;
+int instr(const wchar_t *string, const wchar_t *substring) {
+	wchar_t a, c;
 	int  nStart;
 	int j;
 	int  nLng_SubStr = wcslen(substring),
@@ -266,7 +266,7 @@ int instr(const TCHAR *string, const TCHAR *substring) {
 		return -1;
 	}
 
-	memcpy(&a, &substring[0], sizeof(TCHAR));
+	memcpy(&a, &substring[0], sizeof(wchar_t));
 	nStart = wcscspn(string, &a);
 
 	while (nStart < nLng_Str) 
@@ -278,7 +278,7 @@ int instr(const TCHAR *string, const TCHAR *substring) {
 		}
 		for (j = 1; j<nLng_SubStr; j++) 
 		{
-			memcpy(&c, &substring[j], sizeof(TCHAR));
+			memcpy(&c, &substring[j], sizeof(wchar_t));
 			if (string[nStart + j] != c) 
 			{
 				break;

@@ -31,15 +31,15 @@ struct CPUINFO {
 	bool bSSE2;			//Streaming SIMD Extensions 2
 	bool b3DNOW;		//3DNow! (vendor independent)
 	bool bMMX;			//MMX support
-	TCHAR name[48];		//cpu name
+	wchar_t name[48];		//cpu name
 	bool bEXT;			//extended features available
 	bool bMMXEX;		//MMX (AMD specific extensions)
 	bool b3DNOWEX;		//3DNow! (AMD specific extensions)
-	TCHAR vendor[13];	//vendor name
+	wchar_t vendor[13];	//vendor name
 };
 
 CPUINFO GetCPUInfo();
-void GetCPUName(TCHAR *chName, int n, const TCHAR *vendor);
+void GetCPUName(wchar_t *chName, int n, const wchar_t *vendor);
 bool OSSupportsSSE();
 bool ZFX3DInitCPU();
 

@@ -22,10 +22,10 @@ public:
 	HRESULT AddSkin(const ZFXCOLOR *pcAmbient, const ZFXCOLOR *pcDiffuse, const ZFXCOLOR *pcEmissive,
 					const ZFXCOLOR *pcSpecular, float fSpecPower, UINT *nSkinID);
 
-	HRESULT AddTexture(UINT nSkinID, const TCHAR *chName, bool bAlpha, float fAlpha,
+	HRESULT AddTexture(UINT nSkinID, const wchar_t *chName, bool bAlpha, float fAlpha,
 					ZFXCOLOR *cColorKeys, DWORD dwNumColorKeys);
 
-	HRESULT AddTextureHeightMapAsBump(UINT nSkinID, const TCHAR *chName);
+	HRESULT AddTextureHeightMapAsBump(UINT nSkinID, const wchar_t *chName);
 
 	bool MaterialEqual(const ZFXMATERIAL *pMat0, const ZFXMATERIAL *pMat1);
 
@@ -35,7 +35,7 @@ public:
 
 	ZFXTEXTURE	 GetTexture(UINT nTexID);
 
-	const TCHAR* GetTextureName(UINT nTexID, float *pfAlpha, ZFXCOLOR *pAK, UCHAR *pNum);
+	const wchar_t* GetTextureName(UINT nTexID, float *pfAlpha, ZFXCOLOR *pAK, UCHAR *pNum);
 
 protected:
 	LPDIRECT3DDEVICE9  m_pDevice;
@@ -51,5 +51,5 @@ protected:
 
 	DWORD	MakeD3DColor(UCHAR R, UCHAR G, UCHAR B, UCHAR A);
 
-	void	Log(TCHAR *, ...);
+	void	Log(wchar_t *, ...);
 };

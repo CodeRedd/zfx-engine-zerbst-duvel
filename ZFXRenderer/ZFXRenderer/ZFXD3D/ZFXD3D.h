@@ -135,12 +135,12 @@ private:
 	bool    ConfirmDepthFmt(ZFXCOMBOINFO*);
 
 	//helper functions
-	void	AddItem(HWND hWnd, TCHAR *ch, void *pData);
+	void	AddItem(HWND hWnd, wchar_t *ch, void *pData);
 	void*	GetSelectedItem(HWND hWnd);
-	bool	ContainsString(HWND hWnd, TCHAR *ch);
-	TCHAR*	D3DDevTypeToString(D3DDEVTYPE devType);
-	TCHAR*	D3DFormatToString(D3DFORMAT format);
-	TCHAR*	BehaviorTypeToString(DWORD vpt);
+	bool	ContainsString(HWND hWnd, wchar_t *ch);
+	wchar_t*	D3DDevTypeToString(D3DDEVTYPE devType);
+	wchar_t*	D3DFormatToString(D3DFORMAT format);
+	wchar_t*	BehaviorTypeToString(DWORD vpt);
 
 
 
@@ -202,8 +202,8 @@ public:
 
 
 	//fonts and text
-	HRESULT CreateFont(const TCHAR*, int, bool, bool, bool, DWORD, UINT*);
-	HRESULT DrawText(UINT, int, int, UCHAR, UCHAR, UCHAR, TCHAR*, ...);
+	HRESULT CreateFont(const wchar_t*, int, bool, bool, bool, DWORD, UINT*);
+	HRESULT DrawText(UINT, int, int, UCHAR, UCHAR, UCHAR, wchar_t*, ...);
 
 	///////////////////////////
 	// RENDER/SHADER FUNCTIONS
@@ -214,7 +214,10 @@ public:
 	HRESULT ActivateVShader(UINT, ZFXVERTEXID);
 	HRESULT ActivatePShader(UINT);
 	bool	UsesShaders() { return m_bUseShaders; }
+	void	UsesShaders(bool bUsesShaders) { m_bUseShaders = bUsesShaders; }
 	bool    CanDoShaders() { return m_bCanDoShaders; }
+	void	CanDoShaders(bool bCanDoShaders) { m_bCanDoShaders = bCanDoShaders; }
+	HRESULT SetShaderConstant(ZFXSHADERTYPE, ZFXDATATYPE, UINT, UINT, const void*);
 
 
 private:
@@ -235,7 +238,7 @@ private:
 	HRESULT Go();
 
 	//System logging function
-	void Log(TCHAR *, ...);
+	void Log(wchar_t *, ...);
 
 	//view stuff
 	D3DMATRIX	m_mView2D,			//view matrix 2D

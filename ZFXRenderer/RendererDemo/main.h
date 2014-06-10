@@ -10,7 +10,7 @@
 #include <Windows.h>
 
 LRESULT WINAPI MsgProc(HWND, UINT, WPARAM, LPARAM);
-HRESULT ProgramStartup(TCHAR *chAPI);
+HRESULT ProgramStartup(wchar_t *chAPI);
 HRESULT ProgramCleanup();
 HRESULT ProgramTick();
 HRESULT	BuildAndSetShader();

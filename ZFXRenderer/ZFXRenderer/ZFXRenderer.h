@@ -14,7 +14,7 @@ class ZFXRenderer
 		ZFXRenderer(HINSTANCE hInst);
 		~ZFXRenderer();
 
-		HRESULT				CreateDevice(TCHAR *chAPI);
+		HRESULT				CreateDevice(wchar_t *chAPI);
 		void				Release();
 		LPZFXRENDERDEVICE	GetDevice() { return m_pDevice; }
 		HINSTANCE			GetModule() { return m_hDLL; }

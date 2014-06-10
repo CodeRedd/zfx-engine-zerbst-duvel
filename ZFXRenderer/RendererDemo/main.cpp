@@ -13,7 +13,7 @@
 //Windows global vars
 HWND		g_hWnd	= NULL;
 HINSTANCE	g_hInst = NULL;
-TCHAR		g_szAppClass[] = TEXT("FrameWorkTest");
+wchar_t		g_szAppClass[] = TEXT("FrameWorkTest");
 
 //application global vars
 BOOL g_bIsActive	= FALSE;
@@ -94,11 +94,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lpCmdLine, in
 		g_pG3 = new ZFXModel("models\\G3.s3d", g_pDevice, g_pLog);
 		g_pMarder = new ZFXModel("models\\ma3.s3d", g_pDevice, g_pLog);
 
-		//BUG: CAUSING ACCESS VIOLATIONS
-		/*if (FAILED(BuildAndSetShader()))
+		if (FAILED(BuildAndSetShader()))
 		{
 			g_bDone = true;
-		}*/
+		}
 	}
 
 	ZFXVector vR(1, 0, 0), vU(0, 1, 0), vD(0, 0, 1), vP(0, 0, 0);
@@ -113,7 +112,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lpCmdLine, in
 
 		//do one frame on each window
 		if (g_bIsActive)
-		{
+		{ //BUG: For some reason, only window 0 is being used
 			g_pDevice->UseWindow(0);
 			g_pDevice->SetView3D(vR, vU, vD, vP);
 			ProgramTick();
@@ -177,7 +176,7 @@ LRESULT WINAPI MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 //Create the render device object
-HRESULT ProgramStartup(TCHAR *chAPI)
+HRESULT ProgramStartup(wchar_t *chAPI)
 {
 	HWND hWnd3D[4];
 	RECT rcWnd;
@@ -345,7 +344,7 @@ HRESULT BuildAndSetShader(void) {
 
 	if (!g_pDevice->CanDoShaders()) return S_OK;
 
-	if (FAILED(g_pDevice->CreateVShader("test.vsh", 0, true, false, &nID))) 
+	if (FAILED(g_pDevice->CreateVShader(L"Shaders\\test.vsh", 0, true, false, &nID))) 
 	{
 
 		return ZFX_FAIL;
@@ -356,7 +355,7 @@ HRESULT BuildAndSetShader(void) {
 		return ZFX_FAIL;
 	}
 
-	if (FAILED(g_pDevice->CreatePShader("test.psh", 0, true, false, &nID)))
+	if (FAILED(g_pDevice->CreatePShader(L"Shaders\\test.psh", 0, true, false, &nID)))
 	{
 		return ZFX_FAIL;
 	}
