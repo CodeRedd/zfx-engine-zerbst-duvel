@@ -351,7 +351,7 @@ HRESULT ZFXD3DVCManager::Render(UINT nID)
 		ZFXSKIN *pSkin = &m_pSkinMan->GetSkin(m_pSB[nID].nSkinID);
 
 		//Are we using wireframe mode?
-		if (sm == RS_SHADE_SOLID)
+		if (sm != RS_SHADE_SOLID)
 		{
 			ZFXMATERIAL *pMat = &m_pSkinMan->GetMaterial(pSkin->nMaterial);
 			D3DMATERIAL9 mat = {

@@ -266,7 +266,7 @@ int instr(const wchar_t *string, const wchar_t *substring) {
 		return -1;
 	}
 
-	memcpy(&a, &substring[0], sizeof(wchar_t));
+	wcscpy_s(&a, sizeof(wchar_t), &substring[0]);
 	nStart = wcscspn(string, &a);
 
 	while (nStart < nLng_Str) 
@@ -278,7 +278,7 @@ int instr(const wchar_t *string, const wchar_t *substring) {
 		}
 		for (j = 1; j<nLng_SubStr; j++) 
 		{
-			memcpy(&c, &substring[j], sizeof(wchar_t));
+			wcscpy_s(&c, sizeof(wchar_t), &substring[j]);
 			if (string[nStart + j] != c) 
 			{
 				break;

@@ -196,10 +196,10 @@ HRESULT ZFXD3DSkinManager::AddTexture(UINT nSkinID, const wchar_t *chName, bool 
 		//save texture name
 		m_pTextures[m_nNumTextures].chName = new wchar_t[(wcslen(chName)+1)];
 		size_t n = wcslen(chName)+1;
-		memcpy(m_pTextures[m_nNumTextures].chName, chName, (wcslen(chName)+1));
+		size_t m = sizeof(chName);
+		wcscpy_s(m_pTextures[m_nNumTextures].chName, wcslen(chName) + 1, chName);
 
 		//create new Direct3D texture object
-		//BUG: failing to create the texture for some reason...
 		hr = CreateTexture(&m_pTextures[m_nNumTextures], bAlpha);
 		if (FAILED(hr))
 		{
@@ -311,7 +311,7 @@ HRESULT ZFXD3DSkinManager::AddTextureHeightMapAsBump(UINT nSkinID, const wchar_t
 
 		//save texture name
 		m_pTextures[m_nNumTextures].chName = new wchar_t[wcslen(chName) + 1];
-		memcpy(m_pTextures[m_nNumTextures].chName, chName, wcslen(chName) + 1);
+		wcscpy_s(m_pTextures[m_nNumTextures].chName, wcslen(chName) + 1, chName);
 
 		//create new Direct3D texture object
 		hr = CreateTexture(&m_pTextures[m_nNumTextures], true);
