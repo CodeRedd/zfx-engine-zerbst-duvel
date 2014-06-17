@@ -1,16 +1,18 @@
 ps.1.1
 
-;get texels
+;def c1, 0.30, 0.59, 0.11, 1.0
+
+; sample both textures
 tex t0
 tex t1
 
-;add light values together
-add r0, v0, v1
-add r1, v0, v1
+; multiply each sampled texel
+; with ambient light color
+mul r0, v0, t0
+mul r1, v0, t1
 
-;multiply texels by color value
-mul r0, r0, t0
-mul r1, r1, t1
+; multiply both texels together
+mul r0, r0, r1  
 
-;combine textures to final values
-mul r0, r0, r1
+;add grayscale constant multiplication
+;dp3 r0, r0, c1

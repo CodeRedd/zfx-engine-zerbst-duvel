@@ -88,6 +88,10 @@
   <ItemGroup>
     <None Include="Shaders\base.psh" />
     <None Include="Shaders\base.vsh" />
+    <None Include="Shaders\bump.psh" />
+    <None Include="Shaders\bump.vsh" />
+    <None Include="Shaders\omni.psh" />
+    <None Include="Shaders\omni.vsh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

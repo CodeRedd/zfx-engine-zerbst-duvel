@@ -35,8 +35,11 @@ public:
 
 	virtual HRESULT AddTexture(UINT nSkinID, const wchar_t *chName, bool bAlpha, float fAlpha,
 		ZFXCOLOR *cColorKeys, DWORD dwNumColorKeys) = 0;
+	virtual HRESULT AddTextureHeightMapAsBump(UINT nSkinID, const wchar_t *chName) = 0;
+
 
 	virtual bool MaterialEqual(const ZFXMATERIAL *pMat0, const ZFXMATERIAL *pMat1) = 0;
+
 
 };
 
@@ -104,6 +107,7 @@ class ZFXRenderDevice
 		//rendering
 		bool            m_bUseShaders;       // shaders or fixed function pipeline
 		bool			m_bCanDoShaders;	 // can we use shaders at all?
+		bool            m_bAdditive;         // use additive rendering
 		ZFXRENDERSTATE  m_ShadeMode;         // wireframe rendering?
 		ZFXCOLOR        m_clrWire;           // color for wireframe rendering
 
@@ -181,6 +185,9 @@ class ZFXRenderDevice
 
 		virtual void SetShadeMode(ZFXRENDERSTATE, float, const ZFXCOLOR*) = 0;
 		virtual ZFXRENDERSTATE GetShadeMode() = 0;
+
+		virtual void    UseAdditiveBlending(bool) = 0;
+		virtual bool    UsesAdditiveBlending() = 0;
 
 		/////////////////////
 		// SHADER STUFF

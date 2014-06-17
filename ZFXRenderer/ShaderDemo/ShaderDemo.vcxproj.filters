@@ -34,5 +34,17 @@
     <None Include="Shaders\base.vsh">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Shaders\omni.vsh">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\omni.psh">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\bump.vsh">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\bump.psh">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

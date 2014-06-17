@@ -347,6 +347,71 @@ HRESULT ZFXD3DSkinManager::AddTextureHeightMapAsBump(UINT nSkinID, const wchar_t
 	return ZFX_OK;
 }
 
+HRESULT ZFXD3DSkinManager::ConvertToNormalMap(ZFXTEXTURE *pTexture)
+{
+	HRESULT hr = ZFX_OK;
+	D3DLOCKED_RECT  d3dRect;
+	D3DSURFACE_DESC desc;
+	LPDIRECT3DTEXTURE9 pTex = ((LPDIRECT3DTEXTURE9) pTexture->pData);
+	pTex->GetLevelDesc(0, &desc);
+
+	if (FAILED(pTex->LockRect(0, &d3dRect, NULL, 0)))
+	{
+		return ZFX_BUFFERLOCK;
+	}
+
+	//pointer on pixel data
+	DWORD* pPixel = (DWORD*)d3dRect.pBits;
+
+	//build normal vector for each pixel
+	for (DWORD j = 0; j < desc.Height; j++)
+	{
+		for (DWORD i = 0; i < desc.Width; i++)
+		{
+			DWORD color00 = pPixel[0];
+			DWORD color10 = pPixel[1];
+			DWORD color01 = pPixel[d3dRect.Pitch / sizeof(DWORD)];
+
+			//use only red component from ARGB
+			//shift to the right side in 32-bit DWORD
+			//to get it as value in the range 0 to 255
+			//scale with 1/255 to get the range 0.0 to 1.0
+			float fHeight00 = (float)((color00 & 0x00ff0000) >> 16) / 255.0f;
+			float fHeight10 = (float)((color10 & 0x00ff0000) >> 16) / 255.0f;
+			float fHeight01 = (float)((color01 & 0x00ff0000) >> 16) / 255.0f;
+
+			//build the edges of the triangle
+			ZFXVector vcPoint00(i+0.0f, j+0.0f, fHeight00);
+			ZFXVector vcPoint10(i+1.0f, j+0.0f, fHeight10);
+			ZFXVector vcPoint01(i+0.0f, j+1.0f, fHeight01);
+			ZFXVector vc10 = vcPoint10 - vcPoint00;
+			ZFXVector vc01 = vcPoint01 - vcPoint00;
+
+			//calculate the normal
+			ZFXVector vcNormal;
+			vcNormal.Cross(vc10, vc01);
+			vcNormal.Normalize();
+
+			//save normal as RGB values
+			*pPixel++ = VectorToRGBA(&vcNormal, fHeight00);
+		}
+	}
+
+	pTex->UnlockRect(0);
+	return ZFX_OK;
+}
+
+DWORD ZFXD3DSkinManager::VectorToRGBA(ZFXVector *vc, float fHeight)
+{
+	DWORD r = (DWORD)( 127.0f * vc->x + 128.0f );
+	DWORD g = (DWORD)( 127.0f * vc->y + 128.0f );
+	DWORD b = (DWORD)( 127.0f * vc->z + 128.0f );
+	DWORD a = (DWORD)( 255.0f * fHeight );
+
+	return (a<<24) + (r<<16) + (g<<8) + (b<<0);
+}
+
+
 //macro for downgrading from 24-bit color to 16-bit color
 #define RGB16BIT(r, g, b) ((b%32) + (g%64) << 5) + ((r%32) << 11)
 //loads in an image from file and maps it to a Direct3D texture and ZFXTEXTURE. Contains unused 16-bit color support as an exercise

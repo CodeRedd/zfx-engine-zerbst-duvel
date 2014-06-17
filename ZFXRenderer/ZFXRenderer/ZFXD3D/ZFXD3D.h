@@ -197,7 +197,7 @@ public:
 	void			SetDepthBufferMode(ZFXRENDERSTATE);
 	ZFXCOLOR		GetWireColor(void) { return m_clrWire; }
 	void			SetShadeMode(ZFXRENDERSTATE, float, const ZFXCOLOR*);
-	ZFXRENDERSTATE	GetShadeMode();
+	ZFXRENDERSTATE	GetShadeMode() { return m_ShadeMode; }
 	void			SetAmbientLight(float fRed, float fGreen, float fBlue);
 
 
@@ -215,6 +215,8 @@ public:
 	HRESULT ActivatePShader(UINT);
 	bool	UsesShaders() { return m_bUseShaders; }
 	void	UsesShaders(bool bUsesShaders) { m_bUseShaders = bUsesShaders; }
+	void    UseAdditiveBlending(bool);
+	bool    UsesAdditiveBlending()  { return m_bAdditive; }
 	bool    CanDoShaders() { return m_bCanDoShaders; }
 	void	CanDoShaders(bool bCanDoShaders) { m_bCanDoShaders = bCanDoShaders; }
 	HRESULT SetShaderConstant(ZFXSHADERTYPE, ZFXDATATYPE, UINT, UINT, const void*);

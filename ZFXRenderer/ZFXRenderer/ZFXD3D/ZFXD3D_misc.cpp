@@ -1092,4 +1092,22 @@ void ZFXD3D::SetShadeMode(ZFXRENDERSTATE smd, float f, const ZFXCOLOR *pClr)
 	m_pVertexMan->InvalidateStates();
 }
 
-ZFXRENDERSTATE ZFXD3D::GetShadeMode() { return m_ShadeMode; }
+void ZFXD3D::UseAdditiveBlending(bool b) {
+	if (m_bAdditive == b)
+	{
+		return;
+	}
+
+	// clear all vertex caches
+	m_pVertexMan->ForcedFlushAll();
+	m_pVertexMan->InvalidateStates();
+
+	m_bAdditive = b;
+
+	if (!m_bAdditive) 
+	{
+		m_pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+		m_pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+		m_pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+	}
+}

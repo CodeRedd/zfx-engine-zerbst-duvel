@@ -22,9 +22,18 @@ UINT g_nFontID = 0;
 LPZFXRENDERER     g_pRenderer = NULL;
 LPZFXRENDERDEVICE g_pDevice = NULL;
 
+//geometry
 UINT g_sRoom = 0;
+UINT g_sLight = 0;
 
+//shaders
 UINT g_Base[2] = { 0, 0 };
+UINT g_Omni[2] = { 0, 0 };
+UINT g_Bump[2] = { 0, 0 };
+
+//light attributes
+ZFXVector g_vcL[2];
+ZFXCOLOR  g_clrL[2] = { { 1.0f, 1.0f, 1.0f, 1.0f }, {1.0f, 1.0f, 1.0f, 1.0f} };
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -239,37 +248,81 @@ HRESULT ProgramCleanup()
 
 HRESULT Render(int n)
 {
-	static float fR = -0.4f;
-		
-	ZFXMatrix mat, matInv;
-	ZFXVector vcLightDir(0.0f, 0.0f, 1.0f);
+	
+	ZFXMatrix mat, matA;
 
-	//rotate the room
-	if (fR < -6.283185f)
-	{
-		fR += 6.283185f;
-	}
-
-	fR -= 0.02f;
-
-	mat.RotaY(fR);
+	mat.RotaY(-0.4f);
 	mat._42 -= 0.5f;
-	mat._41 -= 0.5f;
+	mat._41 -= 1.5f;
 
-	g_pDevice->SetAmbientLight(0.2f, 0.2f, 0.2f);
+	g_pDevice->SetAmbientLight(0.5f, 0.5f, 0.5f);
 	g_pDevice->SetWorldTransform(&mat);
 
-	//transform light vector to vertex coord system
+	//ambient pass
+	if (n < 0)
+	{
+		g_pDevice->ActivateVShader(g_Base[0], VID_TV);
+		g_pDevice->ActivatePShader(g_Base[1]);
+	}
+	//additive pass once per omni light
+	else
+	{
+		matA = CalcTransAttenNoRot(g_vcL[n], 6.0f);
+
+		g_pDevice->SetShaderConstant(SHT_VERTEX, DAT_FLOAT, 20, 4, (void*) &matA);
+		g_pDevice->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 0, 1, (void*)&g_clrL[n]);
+		g_pDevice->ActivateVShader(g_Omni[0], VID_TV);
+		g_pDevice->ActivatePShader(g_Omni[1]);
+		g_pDevice->UseAdditiveBlending(true);
+	}
+
+	HRESULT hr = g_pDevice->GetVertexCacheManager()->Render(g_sRoom);
+	g_pDevice->UseAdditiveBlending(false);
+	return hr;
+}
+
+//parameter is now position of the light source
+HRESULT Render(ZFXVector vcLight)
+{
+	ZFXMatrix mat, matInv, matT;
+	ZFXVector vcHalf(0.5f, 0.5f, 0.5f);
+	mat.Identity();
+	mat._42 -= 0.5f;
+
 	matInv.InverseOf(mat);
-	vcLightDir = matInv * vcLightDir;
+	vcLight = matInv * vcLight;
 
-	//set light vector to vertex shader constant c20
-	g_pDevice->SetShaderConstant(SHT_VERTEX, DAT_FLOAT, 20, 1, &vcLightDir);
+	g_pDevice->SetAmbientLight(0.5f, 0.5f, 0.5f);
+	g_pDevice->SetWorldTransform(&mat);
 
-	g_pDevice->ActivateVShader(g_Base[0], VID_TV);
-	g_pDevice->ActivatePShader(g_Base[1]);
+	g_pDevice->SetShaderConstant(SHT_VERTEX, DAT_FLOAT, 25, 1, (void*)&vcLight);
+	g_pDevice->SetShaderConstant(SHT_VERTEX, DAT_FLOAT, 30, 1, (void*)&vcHalf);
+
+	matT.TransposeOf(mat);
+	g_pDevice->SetShaderConstant(SHT_VERTEX, DAT_FLOAT, 31, 4, (void*)&matT);
+	g_pDevice->SetShaderConstant(SHT_PIXEL, DAT_FLOAT, 0, 1, (void*)&g_clrL[0]);
+
+	g_pDevice->ActivateVShader(g_Bump[0], VID_TV);
+	g_pDevice->ActivatePShader(g_Bump[1]);
 
 	return g_pDevice->GetVertexCacheManager()->Render(g_sRoom);
+
+}
+
+HRESULT RenderLight(float tx, float ty, float tz) {
+	ZFXMatrix mat;
+	mat.Identity();
+	mat.Translate(tx, ty, tz);
+
+	g_pDevice->ActivateVShader(g_Base[0], VID_UU);
+	g_pDevice->ActivatePShader(g_Base[1]);
+	g_pDevice->UseAdditiveBlending(false);
+
+	g_pDevice->SetAmbientLight(1.0f, 1.0f, 1.0f);
+
+	g_pDevice->SetWorldTransform(&mat);
+
+	return g_pDevice->GetVertexCacheManager()->Render(g_sLight);
 }
 
 HRESULT ProgramTick()
@@ -278,13 +331,23 @@ HRESULT ProgramTick()
 	ZFXMatrix mat;
 	mat.Identity();
 
+	//move the light
+	float fT = GetTickCount() / 1000.0f;
+	g_vcL[0].Set(2.5f, cosf(fT*2.5f) * 3.0f - 0.5f, 1.0f);
+
+	//change light color smoothly
+	g_clrL[0].fR = 0.5f + 0.5f * sinf(fT*2.0f);
+	g_clrL[0].fG = 0.5f + 0.5f * sinf(fT*2.35f);
+	g_clrL[0].fB = 0.5f + 0.5f * sinf(fT*2.7f);
+
 	//back buffer clear
 	g_pDevice->BeginRendering(true, true, true);
 
-	Render(-1);
+	RenderLight(g_vcL[0].x, g_vcL[0].y, g_vcL[0].z);
+	Render(g_vcL[0]); //ambient
 
 	g_pDevice->UsesShaders(false);
-	g_pDevice->DrawText(g_nFontID, 10, 10, 244, 255, 0, L"Basic Shader Demo");
+	g_pDevice->DrawText(g_nFontID, 10, 10, 255, 255, 0, L"Bump Mapping PS Demo");
 
 	//flip back buffer
 	g_pDevice->EndRendering();
@@ -301,6 +364,14 @@ HRESULT BuildAndSetShader()
 	g_pDevice->CreateVShader(L"Shaders\\base.vsh", 0, true, false, &g_Base[0]);
 
 	g_pDevice->CreatePShader(L"Shaders\\base.psh", 0, true, false, &g_Base[1]);
+
+	g_pDevice->CreateVShader(L"Shaders\\omni.vsh", 0, true, false, &g_Omni[0]);
+
+	g_pDevice->CreatePShader(L"Shaders\\omni.psh", 0, true, false, &g_Omni[1]);
+
+	g_pDevice->CreateVShader(L"Shaders\\bump.vsh", 0, true, false, &g_Bump[0]);
+
+	g_pDevice->CreatePShader(L"Shaders\\bump.psh", 0, true, false, &g_Bump[1]);
 	return ZFX_OK;
 }
 
@@ -318,8 +389,8 @@ HRESULT BuildGeometry()
 	ZFXCOLOR d = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	g_pDevice->GetSkinManager()->AddSkin(&c, &c, &d, &c, 1, &s);
-	g_pDevice->GetSkinManager()->AddTexture(s, L"texture.bmp", false, 0, NULL, 0);
-	g_pDevice->GetSkinManager()->AddTexture(s, L"detailmap.bmp", false, 0, NULL, 0);
+	g_pDevice->GetSkinManager()->AddTexture(s, L"textur_d.bmp", false, 0, NULL, 0);
+	g_pDevice->GetSkinManager()->AddTextureHeightMapAsBump(s, L"textur_b.bmp");
 
 	//Geometry for the "room"
 	CreateCube(ZFXVector(0,0,0), 10.0f, 7.0f, 10.0f, v, i, true);
@@ -530,4 +601,88 @@ void CreateCube(ZFXVector vcP, float fW, float fH, float fD, TVERTEX *pVerts, WO
 	pVerts[21].vcN[1] = pVerts[20].vcN[1];
 	pVerts[22].vcN[1] = pVerts[20].vcN[1];
 	pVerts[23].vcN[1] = pVerts[20].vcN[1];
+}
+
+ZFXMatrix CalcTransAttenNoRot(const ZFXVector &vcPos, float fRadius)
+{
+	ZFXMatrix mA, mS, mTL, mB2, mTP, mX;
+
+	float invRad = 0.5f / fRadius;
+
+	mS.Identity();
+	mB2.Identity();
+	mTL.Identity();
+
+	mS._11 = mS._22 = mS._33 = invRad;
+	mTL.Translate(-vcPos.x, -vcPos.y, -vcPos.z);
+	mB2.Translate(0.5f, 0.5f, 0.5f);
+
+	mA = mTL * mS;
+	mX = mA * mB2;
+
+	mTP.TransposeOf( mX );
+	return mTP;
+}
+
+void CalcTangentSpace(TANGENTVERTEX *tv1, TANGENTVERTEX *tv2, TANGENTVERTEX *tv3)
+{
+	ZFXVector vc, vcA, vcB;
+
+	float fu21 = tv2->fu - tv1->fu;
+	float fv21 = tv2->fv - tv1->fv;
+	float fu31 = tv3->fu - tv1->fu;
+	float fv31 = tv3->fv - tv1->fv;
+
+	vcA.Set(tv2->vcPos.x - tv1->vcPos.x, fu21, fv21);
+	vcB.Set(tv3->vcPos.x - tv1->vcPos.x, fu31, fv31);
+	vc.Cross(vcA, vcB);
+	if (vc.x != 0.0f)
+	{
+		tv1->vcU.x = -vc.y / vc.x;
+		tv1->vcV.x = -vc.z / vc.x;
+	}
+
+	vcA.Set(tv2->vcPos.y - tv1->vcPos.y, fu21, fv21);
+	vcB.Set(tv3->vcPos.y - tv1->vcPos.y, fu31, fv31);
+	vc.Cross(vcA, vcB);
+	if (vc.x != 0.0f)
+	{
+		tv1->vcU.y = -vc.y / vc.x;
+		tv1->vcV.y = -vc.z / vc.x;
+	}
+
+	vcA.Set(tv2->vcPos.z - tv1->vcPos.z, fu21, fv21);
+	vcB.Set(tv3->vcPos.z - tv1->vcPos.z, fu31, fv31);
+	vc.Cross(vcA, vcB);
+	if (vc.x != 0.0f)
+	{
+		tv1->vcU.z = -vc.y / vc.x;
+		tv1->vcV.z = -vc.z / vc.x;
+	}
+
+	//normalize U and V vectors
+	tv1->vcU.Normalize();
+	tv1->vcV.Normalize();
+
+	tv2->vcU = tv3->vcU = tv1->vcU;
+	tv2->vcV = tv3->vcV = tv1->vcV;
+
+	//calculate tangent vectors and make sure they are pointing roughly to the same direction as triangle normal
+	tv1->vcUxV.Cross(tv1->vcU, tv1->vcV);
+	if ((tv1->vcUxV * tv1->vcN) < 0.0f)
+	{
+		tv1->vcUxV *= -1.0f;
+	}
+
+	tv2->vcUxV.Cross(tv2->vcU, tv2->vcV);
+	if ((tv2->vcUxV * tv2->vcN) < 0.0f)
+	{
+		tv2->vcUxV *= -1.0f;
+	}
+
+	tv3->vcUxV.Cross(tv3->vcU, tv3->vcV);
+	if ((tv3->vcUxV * tv3->vcN) < 0.0f)
+	{
+		tv3->vcUxV *= -1.0f;
+	}
 }
