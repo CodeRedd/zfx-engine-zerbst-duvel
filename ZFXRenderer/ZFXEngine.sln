@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXD3D", "ZFXRenderer\ZFXD3
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShaderDemo", "ShaderDemo\ShaderDemo.vcxproj", "{8881D7C3-1532-4483-B708-34EE4F592692}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFX3DModel", "ZFX3DModel\ZFX3DModel.vcxproj", "{56525658-916B-4349-8CF1-A6897348837B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -53,6 +55,12 @@ Global
 		{8881D7C3-1532-4483-B708-34EE4F592692}.Release|Win32.ActiveCfg = Release|Win32
 		{8881D7C3-1532-4483-B708-34EE4F592692}.Release|Win32.Build.0 = Release|Win32
 		{8881D7C3-1532-4483-B708-34EE4F592692}.Release|x64.ActiveCfg = Release|Win32
+		{56525658-916B-4349-8CF1-A6897348837B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{56525658-916B-4349-8CF1-A6897348837B}.Debug|Win32.Build.0 = Debug|Win32
+		{56525658-916B-4349-8CF1-A6897348837B}.Debug|x64.ActiveCfg = Debug|Win32
+		{56525658-916B-4349-8CF1-A6897348837B}.Release|Win32.ActiveCfg = Release|Win32
+		{56525658-916B-4349-8CF1-A6897348837B}.Release|Win32.Build.0 = Release|Win32
+		{56525658-916B-4349-8CF1-A6897348837B}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

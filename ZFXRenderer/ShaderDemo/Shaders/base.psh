@@ -1,6 +1,5 @@
 ps.1.1
-
-;def c1, 0.30, 0.59, 0.11, 1.0
+def c1, 0.30, 0.59, 0.11, 1.0
 
 ; sample both textures
 tex t0
@@ -15,4 +14,4 @@ mul r1, v0, t1
 mul r0, r0, r1  
 
 ;add grayscale constant multiplication
-;dp3 r0, r0, c1
+;dp3 r0, r0, c1 commented for now. we don't want grayscale bump maps!
