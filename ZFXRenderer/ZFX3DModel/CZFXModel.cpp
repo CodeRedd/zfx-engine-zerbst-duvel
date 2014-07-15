@@ -19,7 +19,7 @@ void CZFXModel::Init()
 	m_pRenderDevice = NULL;						// Renderdevice
 	m_uiStartFaceID = 0;						// Offset Faces
 	m_uiStartVertexID = 0;						// Offset Vertices
-	strcpy(m_cLogFileName, "MODELLOG.TXT");	// Logfilename
+	strcpy(m_cLogFileName, "MODELLOG.TXT");		// Logfilename
 	m_bLog = true;								// Logging on
 	m_uiLogLevel = 10;							// Loglevel
 	m_fTime = 0.0;								// Time
@@ -64,6 +64,122 @@ HRESULT CZFXModel::CheckForChunks()
 
 	return S_OK;
 }
+
+//loads data into the ZFXEngine buffers and skins
+//optimization: sort faces by the material they are using
+HRESULT CZFXModel::Prepare()
+{
+	//Init variables
+	ULONG		ulNumIndices = 0;
+	ULONG		ulNumVertices = 0;
+	UINT		uiCurrentMat = 0;
+	PWORD		pIndex = NULL; //temp array for copying indices
+	ULONG		ulCounter = 0;
+	LPMATERIAL  pMaterial = NULL;
+	TCHAR		cTexture[256] = { 0 };
+	PWCHAR		pcSeparator = NULL;
+	ULONG		ulIndexCount = 0;
+
+	//Set up the animation bones
+	SetupBones();
+
+	//sort indices by material they are using
+	LOG(20, false, "Sort Indices By Material [%d]", m_sHeader.uiNumMaterials);
+
+	//calculate max memory needed
+	m_sHeader.ulNumIndices = m_sHeader.ulNumFaces * 3;
+	pIndex = new WORD[ m_sHeader.ulNumIndices];
+
+	m_ppIndices = new PVOID[m_sHeader.uiNumMaterials];
+	ZeroMemory(m_ppIndices, sizeof(PVOID) * m_sHeader.uiNumMaterials);
+
+	m_pIndices = new WORD[m_sHeader.ulNumIndices];
+	ZeroMemory(m_pIndices, sizeof(WORD) * m_sHeader.ulNumIndices);
+
+	m_puiNumIndices = new UINT[m_sHeader.uiNumMaterials];
+	ZeroMemory(m_puiNumIndices, sizeof(UINT) * m_sHeader.uiNumMaterials);
+
+	m_puiSkinBuffer = new UINT[m_sHeader.uiNumMaterials];
+	ZeroMemory(m_puiSkinBuffer, sizeof(UINT) * m_sHeader.uiNumMaterials);
+
+	//sort all faces into the index array
+	do
+	{
+		ZeroMemory(pIndex, sizeof(WORD) * m_sHeader.ulNumIndices);
+
+		//reset counter
+		ulNumIndices = 0;
+
+		//loop through all faces
+		for (ulCounter = 0; ulCounter < m_sHeader.ulNumFaces; ulCounter++)
+		{
+			//still the same material?
+			if (m_pFaces[ulCounter].uiMaterialID == uiCurrentMat)
+			{
+				m_pIndices[ulIndexCount++] = pIndex[ulNumIndices++] = (WORD)m_pFaces[ulCounter].ulIndices[0];
+				m_pIndices[ulIndexCount++] = pIndex[ulNumIndices++] = (WORD)m_pFaces[ulCounter].ulIndices[1];
+				m_pIndices[ulIndexCount++] = pIndex[ulNumIndices++] = (WORD)m_pFaces[ulCounter].ulIndices[2];
+			}
+		}
+
+		//do we not have any indices for this material?
+		if (!ulNumIndices)
+		{
+			//new material
+			uiCurrentMat++;
+			LOG(1, true, "STOP Error: Not Enough Indices...");
+			continue;
+		}
+
+		m_puiNumIndices[uiCurrentMat] = ulNumIndices;
+		m_ppIndices[uiCurrentMat] = new WORD[ulNumIndices];
+		memcpy(m_ppIndices[uiCurrentMat], pIndex, sizeof(WORD) * ulNumIndices);
+
+		//set current material
+		pMaterial = &m_pMaterials[uiCurrentMat];
+
+		//read material
+		if (FAILED(m_pRenderDevice->GetSkinManager()->
+			AddSkin((ZFXCOLOR*)&pMaterial->fAmbient, (ZFXCOLOR*)&pMaterial->fDiffuse, (ZFXCOLOR*)&pMaterial->fEmissive,
+			(ZFXCOLOR*)&pMaterial->fSpecular, pMaterial->fSpecularPower, &m_puiSkinBuffer[uiCurrentMat])))
+		{
+			LOG(1, true, "FAILED [LOAD SKIN %d]", uiCurrentMat);
+		}
+
+		//prepare textures
+		ZeroMemory(cTexture, sizeof(CHAR) * 256);
+		pcSeparator = wcschr(wcsrev(wcsdup(m_pcFileName)), '/');
+
+		if (!pcSeparator)
+		{
+			pcSeparator = wcschr(wcsrev(wcsdup(m_pcFileName)), 92);
+		}
+
+		if (pcSeparator)
+		{
+			wcscpy(cTexture, wcsrev(pcSeparator));
+		}
+		wcscat( cTexture, pMaterial->cTexture_1);
+
+		//load textures
+		if (FAILED(m_pRenderDevice->GetSkinManager()->AddTexture(m_puiSkinBuffer[uiCurrentMat], cTexture, false, 0, NULL, 0)))
+		{
+			LOG(1, true, "FAILED [LOAD TEXTURE %d]", pMaterial->cTexture_1);
+		}
+
+		//next material
+		uiCurrentMat++;
+	}
+	while (uiCurrentMat != m_sHeader.uiNumMaterials);
+
+	//cleanup
+	delete[] pIndex;
+
+	LOG(20, true, " done");
+	return S_OK;
+}
+
+////////////////////////////////////////////////////////////////
 
 HRESULT CZFXModel::ReadHeader()
 {
@@ -164,6 +280,34 @@ HRESULT CZFXModel::ReadFaces()
 	}
 
 	LOG(1, true, " FAILED [FACES]");
+	return E_FAIL;
+}
+
+HRESULT CZFXModel::ReadMeshes()
+{
+	ULONG	ulNumMeshes = m_sHeader.ulNumMeshes;
+
+	LOG(20, false, "Reading Meshes [%d]", ulNumMeshes);
+
+	//allocate memory
+	m_pMeshes = new MESH_S[ulNumMeshes];
+	if (!m_pFaces)
+	{
+		LOG(1, true, " FAILED [MESHES]");
+		return E_FAIL;
+	}
+
+	//read all meshes
+	fread(m_pMeshes, sizeof(MESH_S), ulNumMeshes, m_pFile);
+
+	//look for end chunk
+	if (GetNextChunk(m_sChunk) == V1_END)
+	{
+		LOG(20, true, " OK");
+		return S_OK;
+	}
+
+	LOG(1, true, " FAILED [MESHES]");
 	return E_FAIL;
 }
 
@@ -359,6 +503,8 @@ HRESULT CZFXModel::ReadAnimations()
 	return E_FAIL;
 }
 
+////////////////////////////////////////////////////////////////
+
 WORD CZFXModel::GetNextChunk(CHUNK_S &pChunk)
 {
 	//read the next chunk
@@ -389,7 +535,7 @@ void CZFXModel::SetScaling(float fScale /*0.0f*/)
 	m_sBBoxMax.y = -999999.0f;
 	m_sBBoxMax.z = -999999.0f;
 
-	for (ulCounter = 0; , ulCounter < m_sHeader.ulNumVertices; ulCounter++)
+	for (ulCounter = 0; ulCounter < m_sHeader.ulNumVertices ; ulCounter++)
 	{
 		pVertex = &m_pVertices[ulCounter];
 		//enlarge box if needed
@@ -451,6 +597,145 @@ void CZFXModel::SetScaling(float fScale /*0.0f*/)
 		m_sAABB.vcCenter.z = (m_sBBoxMax.z - m_sBBoxMin.z) / 2;
 	}
 }
+
+HRESULT CZFXModel::SetupBones()
+{
+	//init variables
+	LPJOINT		pJoint = NULL;
+	ULONG		ulCounter = 0;
+	UINT		uiLoop = 0;
+	UINT		uiParentID = 0;
+	ZFXVector	sVector;
+	CVERTEX		*pVertex = NULL;
+	ZFXMatrix	matTemp;
+
+	matTemp.Identity();
+
+	//do we have bones at all?
+	if (m_sHeader.uiNumJoints == 0)
+	{
+		return S_OK;
+	}
+
+	//build the matrices
+	for (ulCounter = 0; ulCounter < m_sHeader.uiNumJoints; ulCounter++)
+	{
+		//get the joint
+		pJoint = &m_pJoints[ulCounter];
+
+		//set rotation to matrix
+		pJoint->sMatrix_relative = CreateRotationMatrix( &pJoint->vRotation );
+
+		//set position to matrix
+		pJoint->sMatrix_relative._14 = pJoint->vPosition.x;
+		pJoint->sMatrix_relative._24 = pJoint->vPosition.y;
+		pJoint->sMatrix_relative._34 = pJoint->vPosition.z;
+
+		//find the parent
+		for (uiLoop = 0; uiLoop < m_sHeader.uiNumJoints; uiLoop++)
+		{
+			uiParentID = 255; //PROBLEM -- I don't like that we build in an assumption that the model will have less than 255 bones. True in 2004...not so true now?
+
+
+			if (wcscmp(m_pJoints[uiLoop].cName, pJoint->cParentName) == 0)
+			{
+				uiParentID = uiLoop;
+				break;
+			}
+		}
+
+		//save off found ID
+		pJoint->wParentID = uiParentID;
+
+		//did we find a parent?
+		if (uiParentID != 255)
+		{
+			//multiply parent's absolute matrix with joint's relative matrix to get joint's absolute matrix
+			//assumes parent's matrices are ordered before their children, and thus already have calculated their absolute matrices
+			pJoint->sMatrix_absolute = m_pJoints[uiParentID].sMatrix_absolute * pJoint->sMatrix_relative;
+		}
+		else
+		{
+			//no parent found, so relative is the same as absolute
+			pJoint->sMatrix_absolute = pJoint->sMatrix_relative;
+		}
+
+		//calculate vertex transform matrix
+		pJoint->sMatrix.TransposeOf(pJoint->sMatrix_absolute);
+
+		//transpose the relative matrix
+		matTemp = pJoint->sMatrix_relative;
+		pJoint->sMatrix_relative.TransposeOf(matTemp);
+	}
+
+	//set up the vertices
+	for (ulCounter = 0; ulCounter < m_sHeader.ulNumVertices; ulCounter++)
+	{
+		//get the current vertex
+		pVertex = &m_pVertices_Orig[ulCounter];
+
+		//continue only if there is a bone
+		if (pVertex->fBone1 != 255.0f)
+		{
+			//get current matrix
+			matTemp.Identity();
+			matTemp = m_pJoints[(UINT) pVertex->fBone1].sMatrix;
+
+			//rotate vertices
+			sVector.x = pVertex->x;
+			sVector.y = pVertex->y;
+			sVector.z = pVertex->z;
+			sVector -= matTemp.GetTranslation();
+			sVector.InvRotateWith( matTemp );
+			pVertex->x = sVector.x;
+			pVertex->y = sVector.y;
+			pVertex->z = sVector.z;
+
+			//rotate normals
+			sVector.x = pVertex->vcN[0];
+			sVector.y = pVertex->vcN[1];
+			sVector.z = pVertex->vcN[2];
+			sVector.InvRotateWith( matTemp );
+			pVertex->vcN[0] = sVector.x;
+			pVertex->vcN[1] = sVector.y;
+			pVertex->vcN[2] = sVector.z;
+		}
+	}
+	return S_OK;
+}
+
+ZFXMatrix CZFXModel::CreateRotationMatrix(ZFXVector *pVector)
+{
+	// Init variables
+	float	sr, sp, sy, cr, cp, cy;
+	ZFXMatrix matRet;
+
+	matRet.Identity();
+
+	sy = (float)sin(pVector->z);
+	cy = (float)cos(pVector->z);
+	sp = (float)sin(pVector->y);
+	cp = (float)cos(pVector->y);
+	sr = (float)sin(pVector->x);
+	cr = (float)cos(pVector->x);
+
+	matRet._11 = cp*cy;
+	matRet._21 = cp*sy;
+	matRet._31 = -sp;
+	matRet._12 = sr*sp*cy + cr*-sy;
+	matRet._22 = sr*sp*sy + cr*cy;
+	matRet._32 = sr*cp;
+	matRet._13 = (cr*sp*cy + -sr*-sy);
+	matRet._23 = (cr*sp*sy + -sr*cy);
+	matRet._33 = cr*cp;
+	matRet._14 = 0.0;
+	matRet._24 = 0.0;
+	matRet._34 = 0.0;
+
+	return matRet;
+}
+
+////////////////////////////////////////////////////////////////
 
 void CZFXModel::LOG(UINT iLevel, bool bCR, PCHAR pcText, ...)
 {

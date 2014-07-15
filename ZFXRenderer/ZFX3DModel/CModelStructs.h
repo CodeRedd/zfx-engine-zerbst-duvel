@@ -72,6 +72,16 @@ struct FACE_S
 };
 typedef FACE_S* LPFACE;
 
+struct MESH_S
+{
+	TCHAR		cName[32];		//name
+	WORD		wNumFaces;		//number of faces
+	PWORD		pIndices;		//face indices
+	UINT		uiMaterialID;	// material ID
+	BYTE		byFlags;		//flags
+};
+typedef MESH_S* LPMESH;
+
 struct MATERIAL_S
 {
 	TCHAR		cName[32];			//name
@@ -97,6 +107,19 @@ struct ANIMATION_S
 };
 typedef ANIMATION_S* LPANIMATION;
 
+struct KF_ROT_S
+{
+	float		fTime;		//time
+	ZFXVector	vRotation;	//rotation
+};
+typedef KF_ROT_S* LPKF_ROT;
+
+struct KF_POS_S
+{
+	float		fTime;		//time
+	ZFXVector	vPosition;	//position
+};
+typedef KF_POS_S* LPKF_POS;
 
 struct JOINT_S
 {
@@ -111,22 +134,8 @@ struct JOINT_S
 	LPKF_POS	pKF_Position;		//position keyframes
 	bool		bAnimated;			//is this joint animated?
 	BYTE		byFlags;			//flags
-	ZFXMatrix   sMatrix;			//matrix
-	ZFXMatrix	sMatrix_absolute;	//absolute matrix
-	ZFXMatrix	sMatrix_relative;	//relative matrix
+	ZFXMatrix   sMatrix;			//vertex transform matrix - transpose of absolute matrix
+	ZFXMatrix	sMatrix_absolute;	//matrix relative to world coordinate system - relative multiplied by absolute of parent
+	ZFXMatrix	sMatrix_relative;	//matrix relative to parent of this joint
 };
 typedef JOINT_S* LPJOINT;
-
-struct KF_ROT_S
-{
-	float		fTime;		//time
-	ZFXVector	vRotation;	//rotation
-};
-typedef KF_ROT_S* LPKF_ROT;
-
-struct KF_POS_S
-{
-	float		fTime;		//time
-	ZFXVector	vPosition;	//position
-};
-typedef KF_POS_S* LPKF_POS;

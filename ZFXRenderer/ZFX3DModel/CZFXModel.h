@@ -20,7 +20,7 @@ public:
 	char		m_cLogFileName[32]; // Logfilename
 
 	void        Init();
-
+	HRESULT		Prepare();
 
 protected:
 	CVERTEX			*m_pVertices;		//vertices
@@ -31,10 +31,12 @@ protected:
 	LPJOINT			m_pJoints;			//joints
 	LPANIMATION		m_pAnimations;		//animations
 	PUINT			m_puiSkinBuffer;    // Skinbuffer
-	PVOID			*m_ppIndices;       // Indices
-	PWORD			m_pIndices;         // Indices
-	PUINT			m_puiNumIndices;    // Number of Indices
+	PVOID			*m_ppIndices;       // array of arrays of indices using the same skin
+	PWORD			m_pIndices;         // array of all indices sorted by skin
+	PUINT			m_puiNumIndices;    // array of the number of indices per skin
 	CHUNKHEAD_S		m_sHeader;			//model header
+	PWCHAR			m_pcFileName;       // filename
+
 
 	FILE			*m_pFile;			//file
 	CHUNK_S			m_sChunk;           //chunk
@@ -46,20 +48,22 @@ protected:
 
 
 	HRESULT		CheckForChunks();
+
 	HRESULT     ReadHeader();					
 	HRESULT     ReadVertices();                
 	HRESULT     ReadMaterials();               
 	HRESULT     ReadFaces();                   
-	HRESULT     ReadMesh();                    
+	HRESULT     ReadMeshes();                    
 	HRESULT     ReadJoints();                  
 	HRESULT     ReadJoint_Main(LPJOINT pJoint); 
 	HRESULT     ReadJoint_KeyFrame_Rot(LPJOINT pJoint);
 	HRESULT     ReadJoint_KeyFrame_Pos(LPJOINT pJoint);
-	HRESULT     ReadAnimations();              
+	HRESULT     ReadAnimations();      
+
 	WORD		GetNextChunk( CHUNK_S &pChunk);
 	void        SetScaling(float fScale = 0.0f);
-
-
+	HRESULT		SetupBones();
+	ZFXMatrix	CreateRotationMatrix(ZFXVector *pVector);
 
 	void		LOG(UINT iLevel, bool bCR, PCHAR pcText, ...); // Log
 
