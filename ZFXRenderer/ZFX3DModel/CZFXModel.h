@@ -21,10 +21,12 @@ public:
 
 	void        Init();
 	HRESULT		Prepare();
+	void          SetAnimation(UINT uiAnim);         
+	void          SetAnimation(bool bSingle, UINT uiAnim);
 
 protected:
 	CVERTEX			*m_pVertices;		//vertices
-	CVERTEX			*m_pVertices_Orig;	//vertices
+	CVERTEX			*m_pVertices_Orig;	//non-animated vertices
 	LPFACE			m_pFaces;			//faces
 	LPMESH			m_pMeshes;			//meshes
 	LPMATERIAL		m_pMaterials;		//materials
@@ -36,14 +38,20 @@ protected:
 	PUINT			m_puiNumIndices;    // array of the number of indices per skin
 	CHUNKHEAD_S		m_sHeader;			//model header
 	PWCHAR			m_pcFileName;       // filename
-
+	UINT			m_uiCurrentAnimation;                
+	float			m_fTime;                             
+	float			m_fStartTime;                        
+	float			m_fFrame;
+	bool			m_bAnimationChanged;
+	bool			m_bAnimationComplete;
+	bool			m_bAnimationRunOnce;
 
 	FILE			*m_pFile;			//file
 	CHUNK_S			m_sChunk;           //chunk
 	VERTEX			m_sBBoxMin;                         
 	VERTEX			m_sBBoxMax;
 	ZFXAABB			m_sAABB;
-
+	
 	ZFXRenderDevice *m_pRenderDevice;   // Renderdevice
 
 
@@ -63,8 +71,13 @@ protected:
 	WORD		GetNextChunk( CHUNK_S &pChunk);
 	void        SetScaling(float fScale = 0.0f);
 	HRESULT		SetupBones();
-	ZFXMatrix	CreateRotationMatrix(ZFXVector *pVector);
+	HRESULT		Animation();
+	HRESULT		AnimationPrepare();
+	HRESULT		AnimationVertices();
 
+
+	ZFXMatrix	CreateRotationMatrix(ZFXVector *pVector);
+	
 	void		LOG(UINT iLevel, bool bCR, PCHAR pcText, ...); // Log
 
 

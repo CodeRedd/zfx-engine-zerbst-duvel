@@ -44,7 +44,7 @@ HRESULT CZFXModel::CheckForChunks()
 		case V1_HEADER:		ReadHeader();		break;
 		case V1_VERTEX:		ReadVertices();		break;
 		case V1_FACE:		ReadFaces();		break;
-		case V1_MESH:		ReadMesh();			break;
+		case V1_MESH:		ReadMeshes();		break;
 		case V1_MATERIAL:	ReadMaterials();	break;
 		case V1_JOINT:		ReadJoints();		break;
 		case V1_ANIMATION:	ReadAnimations();	break;
@@ -176,6 +176,290 @@ HRESULT CZFXModel::Prepare()
 	delete[] pIndex;
 
 	LOG(20, true, " done");
+	return S_OK;
+}
+
+HRESULT CZFXModel::Animation()
+{
+	float		fElapsed = -1.0f;
+	float		fStart = -1.0f;		//start of pose
+	float		fEnd = -1.0f;		//end of pose
+	LPANIMATION pAnimation = NULL;
+
+	//does an animation exist at all?
+	if (m_sHeader.uiNumJoints == 0)
+	{
+		return S_OK;
+	}
+
+	//run only once?
+	if (m_bAnimationRunOnce && m_bAnimationComplete && !m_bAnimationChanged)
+	{
+		return S_OK;
+	}
+
+	//check time
+	m_fTime = (float)GetTickCount();
+
+	//if new then this is the new start time
+	if (m_fStartTime == -1.0f)
+	{
+		m_fStartTime = m_fTime;
+	}
+
+	//calculate elapsed time
+	fElapsed = m_fTime - m_fStartTime;
+
+	//get current animation
+	pAnimation = &m_pAnimations[m_uiCurrentAnimation];
+	fStart = pAnimation->fStartFrame;
+	fEnd = pAnimation->fEndFrame;
+
+	//calculate frame position
+	m_fFrame = fStart + (m_sHeader.fAnimationFPS / 2048) * fElapsed;
+
+	//set new start frame if needed
+	if (m_fFrame <= fStart)
+	{
+		m_fFrame = fStart;
+	}
+
+	//is it the end of the animation?
+	if (m_fFrame >= fEnd)
+	{
+		m_fStartTime = m_fTime;
+		m_fFrame = fStart;
+		m_bAnimationComplete = true;
+	}
+	else
+	{
+		//prepare animation
+		AnimationPrepare();
+
+		//calculate vertex positions
+		AnimationVertices();
+
+		m_bAnimationComplete = false;
+		m_bAnimationChanged = false;
+	}
+	return S_OK;
+}
+
+HRESULT CZFXModel::AnimationPrepare()
+{
+	//init variables
+	LPJOINT		pJoint = NULL;
+	ULONG		ulCounter = 0;
+	UINT		uiLoop = 0;
+	ZFXVector	sPosition;
+	ZFXVector	sRotation;
+	UINT		uiKeyPos = 0;
+	UINT		uiKeyRot = 0;
+	LPKF_ROT	pLastRot = NULL;	//last frame
+	LPKF_ROT	pThisRot = NULL;	//next frame
+	LPKF_ROT	pKeyRot = NULL;
+	LPKF_POS	pLastPos = NULL;	//last frame
+	LPKF_POS	pThisPos = NULL;	//next frame
+	LPKF_POS	pKeyPos = NULL;
+	float		fScale = 0.0f;
+	ZFXMatrix	matTemp;
+	ZFXMatrix	matFinal;
+
+	matTemp.Identity();
+	matFinal.Identity();
+
+	//clip the animation
+	if (m_fFrame > m_sHeader.uiNumFrames)
+	{
+		m_fFrame = 0;
+	}
+
+	//calculate absolute transform matrices
+	for (ulCounter = 0; ulCounter < m_sHeader.uiNumJoints; ulCounter++)
+	{
+		//get current joint
+		pJoint = &m_pJoints[ulCounter];
+
+		//get data
+		uiKeyPos = pJoint->wNumKF_Position;
+		uiKeyRot = pJoint->wNumKF_Rotation;
+
+		//recalculation necessary?
+		if ((uiKeyRot + uiKeyPos) != 0)
+		{
+			//we need a new position or rotation
+			pLastPos = NULL;
+			pThisPos = NULL;
+			pKeyPos = NULL;
+
+			for (uiLoop = 0; uiLoop < uiKeyPos; uiLoop++)
+			{
+				//get current position
+				pKeyPos = &pJoint->pKF_Position[uiLoop];
+
+				//check time
+				if (pKeyPos->fTime >= m_fFrame)
+				{
+					pThisPos = pKeyPos;
+					break;
+				}
+				//we're not there yet
+				pLastPos = pKeyPos;
+			}
+
+			//interpolate positions
+			if (pLastPos && pThisPos)
+			{
+				//calculate scaling
+				fScale = (m_fFrame - pLastPos->fTime) / (pThisPos->fTime - pLastPos->fTime);
+
+				//interpolation
+				sPosition = pLastPos->vPosition + (pThisPos->vPosition - pLastPos->vPosition) * fScale;
+			}
+			else if (!pLastPos)
+			{
+				//copy the position
+				sPosition = pThisPos->vPosition;
+			}
+			else
+			{
+				sPosition = pLastPos->vPosition;
+			}
+
+			//apply rotation
+			pLastRot = NULL;
+			pThisRot = NULL;
+			pKeyRot = NULL;
+
+			for (uiLoop = 0; uiLoop < uiKeyRot; uiLoop++)
+			{
+				//get current rotation
+				pKeyRot = &pJoint->pKF_Rotation[uiLoop];
+
+				//check time
+				if (pKeyRot->fTime >= m_fFrame)
+				{
+					pThisRot = pKeyRot;
+					break;
+				}
+				//we're not there yet
+				pLastRot = pKeyRot;
+			}
+
+			//interpolate rotations
+			if (pLastRot && pThisRot)
+			{
+				sRotation = pLastRot->vRotation + (pThisRot->vRotation - pLastRot->vRotation) * fScale;
+			}
+			else if (!pLastPos)
+			{
+				//copy the position
+				sRotation = pThisRot->vRotation;
+			}
+			else
+			{
+				sRotation = pLastRot->vRotation;
+			}
+
+			//joint matrix setup
+			matTemp.SetTranslation( sPosition );
+			matTemp.Rota( sRotation );
+
+			//calculate relative matrix
+			matFinal = matTemp * pJoint->sMatrix_relative;
+
+			//is there a parent?
+			if (pJoint->wParentID != 255)
+			{
+				//account for positioning of parent
+				pJoint->sMatrix = matFinal * m_pJoints[pJoint->wParentID].sMatrix;
+			}
+			else
+			{
+				pJoint->sMatrix = matFinal;
+			}
+		}
+		else
+		{
+			//no new matrix, so copy the old one
+			pJoint->sMatrix = pJoint->sMatrix_relative;
+		}
+	}
+	return S_OK;
+}
+
+HRESULT CZFXModel::AnimationVertices()
+{
+	//init variables
+	ULONG		ulCounter = 0;
+	CVERTEX		*pVertex = NULL;
+	CVERTEX		*pVertex_Orig = NULL;
+	ZFXVector	sVector;
+
+	//reset bounding box
+	m_sBBoxMin.x = 999999.0f;
+	m_sBBoxMin.y = 999999.0f;
+	m_sBBoxMin.z = 999999.0f;
+	m_sBBoxMax.x = -999999.0f;
+	m_sBBoxMax.y = -999999.0f;
+	m_sBBoxMax.z = -999999.0f;
+
+	//recalculate the vertices
+	for (ulCounter = 0; ulCounter < m_sHeader.ulNumVertices; ulCounter++)
+	{
+		//get current vertex
+		pVertex = &m_pVertices[ulCounter];
+		pVertex_Orig = &m_pVertices_Orig[ulCounter];
+
+		//do we have a bone?
+		if (pVertex->fBone1 != 255.0f)
+		{
+			//1. get original (non-animated) vertex
+			sVector.x = pVertex_Orig->x;
+			sVector.y = pVertex_Orig->y;
+			sVector.z = pVertex_Orig->z;
+
+			//2. rotate the vertex
+			sVector.RotateWith(m_pJoints[(UINT)pVertex_Orig->fBone1].sMatrix);
+
+			//3. get position
+			sVector += m_pJoints[(UINT)pVertex_Orig->fBone1].sMatrix.GetTranslation();
+
+			//4. calculate new position
+			pVertex->x = sVector.x;
+			pVertex->y = sVector.y;
+			pVertex->z = sVector.z;
+
+			//5. animate the normals
+			sVector.x = pVertex_Orig->vcN[0];
+			sVector.y = pVertex_Orig->vcN[1];
+			sVector.z = pVertex_Orig->vcN[2];
+			sVector.RotateWith(m_pJoints[(UINT)pVertex_Orig->fBone1].sMatrix);
+			pVertex->vcN[0] = sVector.x;
+			pVertex->vcN[1] = sVector.y;
+			pVertex->vcN[2] = sVector.z;
+
+			//6. calculate bounding box
+			m_sBBoxMax.x = max(m_sBBoxMax.x, pVertex->x);
+			m_sBBoxMax.y = max(m_sBBoxMax.y, pVertex->y);
+			m_sBBoxMax.z = max(m_sBBoxMax.z, pVertex->z);
+			m_sBBoxMin.x = min(m_sBBoxMin.x, pVertex->x);
+			m_sBBoxMin.y = min(m_sBBoxMin.y, pVertex->y);
+			m_sBBoxMin.z = min(m_sBBoxMin.z, pVertex->z);
+		}
+	}
+
+	//7. create AABB
+	m_sAABB.vcMin.x = m_sBBoxMin.x;
+	m_sAABB.vcMin.y = m_sBBoxMin.y;
+	m_sAABB.vcMin.z = m_sBBoxMin.z;
+	m_sAABB.vcMax.x = m_sBBoxMax.x;
+	m_sAABB.vcMax.y = m_sBBoxMax.y;
+	m_sAABB.vcMax.z = m_sBBoxMax.z;
+	m_sAABB.vcCenter.x = (m_sBBoxMax.x - m_sBBoxMin.x) / 2;
+	m_sAABB.vcCenter.y = (m_sBBoxMax.y - m_sBBoxMin.y) / 2;
+	m_sAABB.vcCenter.z = (m_sBBoxMax.z - m_sBBoxMin.z) / 2;
+	
 	return S_OK;
 }
 
@@ -702,6 +986,36 @@ HRESULT CZFXModel::SetupBones()
 		}
 	}
 	return S_OK;
+}
+
+void CZFXModel::SetAnimation(UINT uiAnim)
+{
+	// In Range?
+	if (uiAnim > m_sHeader.uiNumAnimations)
+	{
+		uiAnim = 0;
+	}
+	if (uiAnim < 0)
+	{
+		uiAnim = m_sHeader.uiNumAnimations;
+	}
+
+	// Set Animation
+	m_uiCurrentAnimation = uiAnim;
+
+	// Multiply Animations
+	m_bAnimationRunOnce = false;
+}
+
+void CZFXModel::SetAnimation(bool bSingle, UINT uiAnim)
+{
+	// Set the wanted Animation
+	SetAnimation(uiAnim);
+
+	// Multiply Animations
+	m_bAnimationChanged = true;
+	m_bAnimationRunOnce = bSingle;
+	m_bAnimationComplete = false;
 }
 
 ZFXMatrix CZFXModel::CreateRotationMatrix(ZFXVector *pVector)
