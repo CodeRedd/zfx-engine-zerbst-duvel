@@ -21,8 +21,10 @@ public:
 
 	void        Init();
 	HRESULT		Prepare();
-	void          SetAnimation(UINT uiAnim);         
-	void          SetAnimation(bool bSingle, UINT uiAnim);
+	HRESULT     Update(float fTime);               
+	HRESULT     Render();
+	void        SetAnimation(UINT uiAnim);         
+	void        SetAnimation(bool bSingle, UINT uiAnim);
 
 protected:
 	CVERTEX			*m_pVertices;		//vertices
@@ -45,6 +47,8 @@ protected:
 	bool			m_bAnimationChanged;
 	bool			m_bAnimationComplete;
 	bool			m_bAnimationRunOnce;
+	bool			m_bRenderBones;
+	bool			m_bRenderNormals;
 
 	FILE			*m_pFile;			//file
 	CHUNK_S			m_sChunk;           //chunk
@@ -71,6 +75,8 @@ protected:
 	WORD		GetNextChunk( CHUNK_S &pChunk);
 	void        SetScaling(float fScale = 0.0f);
 	HRESULT		SetupBones();
+	HRESULT     RenderBones();                
+	HRESULT     RenderNormals();              
 	HRESULT		Animation();
 	HRESULT		AnimationPrepare();
 	HRESULT		AnimationVertices();

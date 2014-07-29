@@ -17,9 +17,7 @@ void CZFXModel::Init()
 	m_pIndices = NULL;							// Indices
 	m_pAnimations = NULL;						// Animations
 	m_pRenderDevice = NULL;						// Renderdevice
-	m_uiStartFaceID = 0;						// Offset Faces
-	m_uiStartVertexID = 0;						// Offset Vertices
-	strcpy(m_cLogFileName, "MODELLOG.TXT");		// Logfilename
+	strcpy_s(m_cLogFileName, "MODELLOG.TXT");		// Logfilename
 	m_bLog = true;								// Logging on
 	m_uiLogLevel = 10;							// Loglevel
 	m_fTime = 0.0;								// Time
@@ -148,18 +146,18 @@ HRESULT CZFXModel::Prepare()
 
 		//prepare textures
 		ZeroMemory(cTexture, sizeof(CHAR) * 256);
-		pcSeparator = wcschr(wcsrev(wcsdup(m_pcFileName)), '/');
+		pcSeparator = wcschr(_wcsrev(_wcsdup(m_pcFileName)), '/');
 
 		if (!pcSeparator)
 		{
-			pcSeparator = wcschr(wcsrev(wcsdup(m_pcFileName)), 92);
+			pcSeparator = wcschr(_wcsrev(_wcsdup(m_pcFileName)), 92);
 		}
 
 		if (pcSeparator)
 		{
-			wcscpy(cTexture, wcsrev(pcSeparator));
+			wcscpy_s(cTexture, _wcsrev(pcSeparator));
 		}
-		wcscat( cTexture, pMaterial->cTexture_1);
+		wcscat_s( cTexture, pMaterial->cTexture_1);
 
 		//load textures
 		if (FAILED(m_pRenderDevice->GetSkinManager()->AddTexture(m_puiSkinBuffer[uiCurrentMat], cTexture, false, 0, NULL, 0)))
@@ -178,6 +176,46 @@ HRESULT CZFXModel::Prepare()
 	LOG(20, true, " done");
 	return S_OK;
 }
+
+HRESULT CZFXModel::Update(float fTime)
+{
+	//set the time
+	m_fTime = fTime;
+
+	//do the next frame of animation
+	return Animation();
+}
+
+HRESULT CZFXModel::Render()
+{
+	UINT uiCounter = 0;
+
+	//set culling
+	m_pRenderDevice->SetBackfaceCulling(RS_CULL_CCW);
+
+	//render vertex buffer
+	for (uiCounter = 0; uiCounter < m_sHeader.uiNumMaterials; uiCounter++)
+	{
+		if (FAILED(m_pRenderDevice->GetVertexCacheManager()->Render(VID_CA, m_sHeader.ulNumVertices, m_puiNumIndices[uiCounter], m_pVertices,
+																	(PWORD)m_ppIndices[uiCounter], m_puiSkinBuffer[uiCounter])))
+		{
+			LOG(1, true, "ERROR Failed To Render VB: %d [%d]", m_puiSkinBuffer[uiCounter], uiCounter);
+		}
+	}
+
+	//render other data as requested
+	if (m_bRenderBones)
+	{
+		RenderBones();
+	}
+	if (m_bRenderNormals)
+	{
+		RenderNormals();
+	}
+	return S_OK;
+}
+
+////////////////////////////////////////////////////////////////
 
 HRESULT CZFXModel::Animation()
 {
@@ -988,6 +1026,85 @@ HRESULT CZFXModel::SetupBones()
 	return S_OK;
 }
 
+HRESULT CZFXModel::RenderBones()
+{
+	UINT	uiCounter = 0;
+	LVERTEX pLine[3];
+	WORD	pIndic[3] = { 0, 1, 2};
+	DWORD	dwColor = 0x00FFFF;
+
+	//do we have bones at all?
+	if (m_sHeader.uiNumJoints == 0)
+	{
+		return S_OK;
+	}
+
+	//turn off backface culling and depth buffer so we can see the bones inside the model from all angles
+	m_pRenderDevice->SetBackfaceCulling(RS_CULL_NONE);
+	m_pRenderDevice->SetDepthBufferMode(RS_DEPTH_NONE);
+
+	//render the bones
+	for (uiCounter = 0; uiCounter < m_sHeader.uiNumJoints; uiCounter++)
+	{
+		//first vertex
+		pLine[0].x = m_pJoints[uiCounter].sMatrix._41;
+		pLine[0].y = m_pJoints[uiCounter].sMatrix._42;
+		pLine[0].z = m_pJoints[uiCounter].sMatrix._43;
+		pLine[0].Color = dwColor;
+
+		//draw the bones from joint to its parent
+		if (m_pJoints[uiCounter].wParentID != 255) 
+		{
+			//second vertex
+			pLine[1].x = m_pJoints[m_pJoints[uiCounter].wParentID].sMatrix._41;
+			pLine[1].y = m_pJoints[m_pJoints[uiCounter].wParentID].sMatrix._42;
+			pLine[1].z = m_pJoints[m_pJoints[uiCounter].wParentID].sMatrix._43;
+			pLine[1].Color = dwColor;
+
+			//third vertex
+			pLine[2].x = pLine[1].x + 1.0f;
+			pLine[2].y = pLine[1].y + 1.0f;
+			pLine[2].z = pLine[1].z + 1.0f;
+			pLine[2].Color = dwColor;
+
+			//render
+			m_pRenderDevice->GetVertexCacheManager()->Render(VID_UL, 3, 3, pLine, pIndic, 0);
+		}
+	}
+
+	m_pRenderDevice->SetDepthBufferMode(RS_DEPTH_READWRITE);
+	m_pRenderDevice->SetBackfaceCulling(RS_CULL_CCW);
+	return S_OK;
+}
+
+HRESULT CZFXModel::RenderNormals()
+{
+	ULONG		ulCounter = 0;
+	float		fStart[3] = {0,0,0};
+	float		fEnd[3] = {0,0,0};
+	ZFXCOLOR	sColor = {1.0f, 0, 0, 0};
+	CVERTEX*	pVertex = NULL;
+
+	//render the normals
+	for (ulCounter = 0; ulCounter < m_sHeader.ulNumVertices; ulCounter++)
+	{
+		//get current vertex
+		pVertex = &m_pVertices[ulCounter];
+
+		//set starting point
+		memcpy(fStart, &pVertex->x,sizeof(float) * 3);
+
+		//set end point
+		fEnd[0] = fStart[0] + (pVertex->vcN[0] * 2.0f);
+		fEnd[1] = fStart[1] + (pVertex->vcN[1] * 2.0f);
+		fEnd[2] = fStart[2] + (pVertex->vcN[2] * 2.0f);
+
+		//render
+		m_pRenderDevice->GetVertexCacheManager()->RenderLine(fStart, fEnd, &sColor);
+	}
+	return S_OK;
+}
+
 void CZFXModel::SetAnimation(UINT uiAnim)
 {
 	// In Range?
@@ -1074,7 +1191,7 @@ void CZFXModel::LOG(UINT iLevel, bool bCR, PCHAR pcText, ...)
 			va_start(args, pcText);
 
 			// copy all data to cBuffer
-			vsprintf(cBuffer, pcText, args);
+			vsprintf_s(cBuffer, pcText, args);
 
 			// reset the list
 			va_end(args);

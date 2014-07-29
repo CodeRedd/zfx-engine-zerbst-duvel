@@ -589,6 +589,62 @@ HRESULT ZFXD3DVCManager::RenderLines(ZFXVERTEXID VertexID, UINT nVerts, const vo
 	return ZFX_OK;
 }
 
+HRESULT ZFXD3DVCManager::RenderLine(const float *fStart, const float *fEnd, const ZFXCOLOR *pClr)
+{
+	D3DMATERIAL9 mtrl;
+	LVERTEX      pVerts[2];
+
+	if (!pClr)
+	{
+		return ZFX_INVALIDPARAM;
+	}
+
+	// we will change states
+	ForcedFlushAll();
+
+	// active skin and static buffer will become invalid
+	InvalidateStates();
+
+	// make sure state is switched off
+	m_pZFXD3D->UsesShaders(false);
+
+	// set coordinates
+	pVerts[0].x = fStart[0];
+	pVerts[0].y = fStart[1];
+	pVerts[0].z = fStart[2];
+	pVerts[1].x = fEnd[0];
+	pVerts[1].y = fEnd[1];
+	pVerts[1].z = fEnd[2];
+
+	// set prelit material and color
+	pVerts[0].Color = pVerts[1].Color = D3DCOLOR_COLORVALUE(pClr->fR, pClr->fG, pClr->fB, pClr->fA);
+
+	memset(&mtrl, 0, sizeof(D3DMATERIAL9));
+	mtrl.Diffuse.r = mtrl.Ambient.r = pClr->fR;
+	mtrl.Diffuse.g = mtrl.Ambient.g = pClr->fG;
+	mtrl.Diffuse.b = mtrl.Ambient.b = pClr->fB;
+	mtrl.Diffuse.a = mtrl.Ambient.a = pClr->fA;
+
+	m_pDevice->SetMaterial(&mtrl);
+	m_pDevice->SetTexture(0, NULL);
+
+	m_pDevice->SetFVF(FVF_LVERTEX);
+	m_pDevice->SetVertexShader(NULL);
+	m_pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
+
+	// render line
+	if (FAILED(m_pDevice->DrawPrimitiveUP(D3DPT_LINELIST, 1, pVerts, sizeof(LVERTEX)))) 
+	{
+		m_pDevice->SetFVF(NULL);
+		m_pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
+		return ZFX_FAIL;
+	}
+
+	m_pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
+	m_pDevice->SetFVF(NULL);
+	return ZFX_OK;
+}
+
 HRESULT ZFXD3DVCManager::ForcedFlush(ZFXVERTEXID VertexID)
 {
 	ZFXD3DVCache **pCache = NULL;

@@ -167,11 +167,11 @@ public:
 	/////////////////////////
 
 	//general
-	UINT      GetActiveSkinID(void)     { return m_nActiveSkin; }
-	void      SetActiveSkinID(UINT nID) { m_nActiveSkin = nID; }
+	UINT    GetActiveSkinID(void)     { return m_nActiveSkin; }
+	void    SetActiveSkinID(UINT nID) { m_nActiveSkin = nID; }
 	void	Release();
 	bool	IsRunning() { return m_bIsSceneRunning; }
-	void      GetResolution(POINT *pPt) { pPt->x = m_dwWidth;  pPt->y = m_dwHeight; }
+	void    GetResolution(POINT *pPt) { pPt->x = m_dwWidth;  pPt->y = m_dwHeight; }
 
 	HRESULT BeginRendering(bool, bool, bool);
 	HRESULT Clear(bool, bool, bool);

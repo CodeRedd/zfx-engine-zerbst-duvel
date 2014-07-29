@@ -64,6 +64,8 @@ public:
 
 	virtual HRESULT RenderLines(ZFXVERTEXID VertexID, UINT nVerts, const void *pVerts, const ZFXCOLOR *pClr, bool bStrip)=0;
 
+	virtual HRESULT RenderLine(const float *fStart, const float *fEnd, const ZFXCOLOR *pClr)=0;
+
 	virtual HRESULT ForcedFlushAll()=0;
 
 	virtual HRESULT ForcedFlush(ZFXVERTEXID)=0;

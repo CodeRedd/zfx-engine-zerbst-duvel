@@ -56,6 +56,8 @@ public:
 
 	HRESULT RenderLines(ZFXVERTEXID VertexID, UINT nVerts, const void *pVerts, const ZFXCOLOR *pClr, bool bStrip);
 
+	HRESULT RenderLine(const float *fStart, const float *fEnd, const ZFXCOLOR *pClr);
+
 	HRESULT ForcedFlushAll();
 	HRESULT ForcedFlush(ZFXVERTEXID VertexID);
 
