@@ -192,3 +192,12 @@ struct TVERTEX {
 	float  tu, tv;
 	float  vcU[3];
 };
+
+// INPUT TYPES:
+
+enum ZFXINPUTDEV
+{
+	IDV_KEYBOARD,
+	IDV_JOYSTICK,
+	IDV_MOUSE
+};

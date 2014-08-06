@@ -55,12 +55,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;ZFXD3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\_Side Projects\ZFX\ZFXRenderer\ZFXRenderer;C:\_Side Projects\ZFX\ZFXRenderer\ZFX3D</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\_Code Redd Games\Projects\ZFX\ZFXRenderer\ZFXRenderer;C:\_Code Redd Games\Projects\ZFX\ZFXRenderer\ZFX3D</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>C:\_Side Projects\ZFX\ZFXRenderer\Debug\ZFXRenderer.lib;C:\_Side Projects\ZFX\ZFXRenderer\Debug\ZFX3DMath.lib;d3d9.lib;d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\_Code Redd Games\Projects\ZFX\ZFXRenderer\Debug\ZFXRenderer.lib;C:\_Code Redd Games\Projects\ZFX\ZFXRenderer\Debug\ZFX3DMath.lib;d3d9.lib;d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

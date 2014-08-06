@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30110.0
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXRenderer", "ZFXRenderer\ZFXRenderer.vcxproj", "{91421DA1-CF39-403E-ADB1-4A19961A5749}"
 EndProject
@@ -14,6 +14,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShaderDemo", "ShaderDemo\ShaderDemo.vcxproj", "{8881D7C3-1532-4483-B708-34EE4F592692}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFX3DModel", "ZFX3DModel\ZFX3DModel.vcxproj", "{56525658-916B-4349-8CF1-A6897348837B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXInput", "..\ZFXInput\ZFXInput.vcxproj", "{9894BD50-4A0D-49AA-BBC1-B50786D7874B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXDI", "..\ZFXInput\ZFXDI\ZFXDI.vcxproj", "{B850E04F-4AB9-40E1-A614-4A54A3CE2C9B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +65,18 @@ Global
 		{56525658-916B-4349-8CF1-A6897348837B}.Release|Win32.ActiveCfg = Release|Win32
 		{56525658-916B-4349-8CF1-A6897348837B}.Release|Win32.Build.0 = Release|Win32
 		{56525658-916B-4349-8CF1-A6897348837B}.Release|x64.ActiveCfg = Release|Win32
+		{9894BD50-4A0D-49AA-BBC1-B50786D7874B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9894BD50-4A0D-49AA-BBC1-B50786D7874B}.Debug|Win32.Build.0 = Debug|Win32
+		{9894BD50-4A0D-49AA-BBC1-B50786D7874B}.Debug|x64.ActiveCfg = Debug|Win32
+		{9894BD50-4A0D-49AA-BBC1-B50786D7874B}.Release|Win32.ActiveCfg = Release|Win32
+		{9894BD50-4A0D-49AA-BBC1-B50786D7874B}.Release|Win32.Build.0 = Release|Win32
+		{9894BD50-4A0D-49AA-BBC1-B50786D7874B}.Release|x64.ActiveCfg = Release|Win32
+		{B850E04F-4AB9-40E1-A614-4A54A3CE2C9B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B850E04F-4AB9-40E1-A614-4A54A3CE2C9B}.Debug|Win32.Build.0 = Debug|Win32
+		{B850E04F-4AB9-40E1-A614-4A54A3CE2C9B}.Debug|x64.ActiveCfg = Debug|Win32
+		{B850E04F-4AB9-40E1-A614-4A54A3CE2C9B}.Release|Win32.ActiveCfg = Release|Win32
+		{B850E04F-4AB9-40E1-A614-4A54A3CE2C9B}.Release|Win32.Build.0 = Release|Win32
+		{B850E04F-4AB9-40E1-A614-4A54A3CE2C9B}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
