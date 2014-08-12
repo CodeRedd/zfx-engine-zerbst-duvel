@@ -1,0 +1,8 @@
+;File: ZFXDI.def
+;Created by Stefan Zerbst and Oliver Duvel
+;Reimplemented by Culver Redd
+;The following functions are exported from this DLL
+LIBRARY   "ZFXDI.dll"
+EXPORTS
+   CreateInputDevice
+   ReleaseInputDevice
