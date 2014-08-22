@@ -41,6 +41,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -58,7 +59,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>C:\_Code Redd Games\Projects\ZFX\ZFXRenderer\Debug\ZFXRenderer.lib;C:\_Code Redd Games\Projects\ZFX\ZFXInput\Debug\ZFXInput.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\_Code Redd Games\Projects\ZFX\ZFXRenderer\Debug\ZFXRenderer.lib;C:\_Code Redd Games\Projects\ZFX\ZFXInput\Debug\ZFXInput.lib;dxguid.lib;dinput8.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
