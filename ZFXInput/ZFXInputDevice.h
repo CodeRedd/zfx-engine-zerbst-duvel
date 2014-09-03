@@ -32,8 +32,8 @@ public:
 	// is initialized?
 	virtual bool IsRunning() = 0;
 
-	// joystick available?
-	virtual bool HasJoystick(TCHAR *pJoyName) = 0;
+	// gamepad available?
+	virtual bool HasGamepad(TCHAR *pGamepadName) = 0;
 
 	// poll input devices
 	virtual HRESULT Update() = 0;
@@ -42,7 +42,7 @@ public:
 	virtual HRESULT GetPosition(ZFXINPUTDEV, POINT*) = 0;
 
 	// for joysticks only (intensity range from -1 to +1)
-	virtual HRESULT GetJoyDeflection(float*, float*) = 0;
+	virtual HRESULT GetPadDeflection(float*, float*) = 0;
 
 	// get change in mouse position
 	virtual POINT GetMouseDelta() = 0;

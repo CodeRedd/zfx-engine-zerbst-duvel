@@ -8,6 +8,34 @@
 #include <ZFX.h>
 #include <dinput.h>
 
+class ZFXKeyboard;
+class ZFXMouse;
+class ZFXGamepad;
+
+class ZFXDI : public ZFXInputDevice
+{
+public:
+	ZFXDI(HINSTANCE hDLL);
+	~ZFXDI();
+
+	HRESULT Init(HWND, const RECT *, LONG, LONG, bool);
+
+	void Release();
+	bool IsRunning() { return m_bRunning; }
+	bool HasGamepad(TCHAR *pGamepadName);
+
+	HRESULT Update();
+
+	bool IsPressed(ZFXINPUTDEV idType, UINT nID);
+	bool IsReleased(ZFXINPUTDEV idType, UINT nID);
+	HRESULT GetPosition(ZFXINPUTDEV idType, POINT *pPt);
+
+private:
+	LPDIRECTINPUT8	m_pDI;
+	ZFXKeyboard		*m_pKB;
+	ZFXMouse		*m_pMouse;
+	ZFXGamepad		*m_pGamepad;
+};
 
 class ZFXDIDevice
 {
