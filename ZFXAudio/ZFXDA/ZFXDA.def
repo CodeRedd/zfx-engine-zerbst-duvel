@@ -1,7 +1,7 @@
-;File: ZFXDI.def
+;File: ZFXDA.def
 ;Created by Stefan Zerbst and Oliver Duvel
 ;The following functions are exported from this DLL
-LIBRARY   "ZFXDI.dll"
+LIBRARY   "ZFXDA.dll"
 EXPORTS
-   CreateInputDevice
-   ReleaseInputDevice
+   CreateAudioDevice
+   ReleaseAudioDevice

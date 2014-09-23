@@ -19,6 +19,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXInput", "..\ZFXInput\ZFX
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXDI", "..\ZFXInput\ZFXDI\ZFXDI.vcxproj", "{B850E04F-4AB9-40E1-A614-4A54A3CE2C9B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXAudio", "..\ZFXAudio\ZFXAudio.vcxproj", "{0CFE1C9E-CFB9-4470-863D-AE594BD248EA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXDA", "..\ZFXAudio\ZFXDA\ZFXDA.vcxproj", "{54328B41-422F-410D-ABAD-EF19A5876B84}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -77,6 +81,18 @@ Global
 		{B850E04F-4AB9-40E1-A614-4A54A3CE2C9B}.Release|Win32.ActiveCfg = Release|Win32
 		{B850E04F-4AB9-40E1-A614-4A54A3CE2C9B}.Release|Win32.Build.0 = Release|Win32
 		{B850E04F-4AB9-40E1-A614-4A54A3CE2C9B}.Release|x64.ActiveCfg = Release|Win32
+		{0CFE1C9E-CFB9-4470-863D-AE594BD248EA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0CFE1C9E-CFB9-4470-863D-AE594BD248EA}.Debug|Win32.Build.0 = Debug|Win32
+		{0CFE1C9E-CFB9-4470-863D-AE594BD248EA}.Debug|x64.ActiveCfg = Debug|Win32
+		{0CFE1C9E-CFB9-4470-863D-AE594BD248EA}.Release|Win32.ActiveCfg = Release|Win32
+		{0CFE1C9E-CFB9-4470-863D-AE594BD248EA}.Release|Win32.Build.0 = Release|Win32
+		{0CFE1C9E-CFB9-4470-863D-AE594BD248EA}.Release|x64.ActiveCfg = Release|Win32
+		{54328B41-422F-410D-ABAD-EF19A5876B84}.Debug|Win32.ActiveCfg = Debug|Win32
+		{54328B41-422F-410D-ABAD-EF19A5876B84}.Debug|Win32.Build.0 = Debug|Win32
+		{54328B41-422F-410D-ABAD-EF19A5876B84}.Debug|x64.ActiveCfg = Debug|Win32
+		{54328B41-422F-410D-ABAD-EF19A5876B84}.Release|Win32.ActiveCfg = Release|Win32
+		{54328B41-422F-410D-ABAD-EF19A5876B84}.Release|Win32.Build.0 = Release|Win32
+		{54328B41-422F-410D-ABAD-EF19A5876B84}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
