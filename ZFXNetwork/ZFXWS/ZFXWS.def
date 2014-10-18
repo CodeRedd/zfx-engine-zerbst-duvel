@@ -1,0 +1,7 @@
+;File: ZFXWS.def
+;Created by Stefan Zerbst and Oliver Duvel
+;The following functions are exported from this DLL
+LIBRARY   "ZFXWS.dll"
+EXPORTS
+   CreateNetworkDevice
+   ReleaseNetworkDevice

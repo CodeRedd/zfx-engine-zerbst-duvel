@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXRenderer", "ZFXRenderer\ZFXRenderer.vcxproj", "{91421DA1-CF39-403E-ADB1-4A19961A5749}"
 EndProject
@@ -22,6 +22,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXAudio", "..\ZFXAudio\ZFXAudio.vcxproj", "{0CFE1C9E-CFB9-4470-863D-AE594BD248EA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXDA", "..\ZFXAudio\ZFXDA\ZFXDA.vcxproj", "{54328B41-422F-410D-ABAD-EF19A5876B84}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXNetwork", "..\ZFXNetwork\ZFXNetwork.vcxproj", "{167BAB46-1702-4E5D-BD74-CFE70EA32B92}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXWS", "..\ZFXNetwork\ZFXWS\ZFXWS.vcxproj", "{DFD3B4AC-7891-4B5F-AE32-F8337C740038}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -93,6 +97,18 @@ Global
 		{54328B41-422F-410D-ABAD-EF19A5876B84}.Release|Win32.ActiveCfg = Release|Win32
 		{54328B41-422F-410D-ABAD-EF19A5876B84}.Release|Win32.Build.0 = Release|Win32
 		{54328B41-422F-410D-ABAD-EF19A5876B84}.Release|x64.ActiveCfg = Release|Win32
+		{167BAB46-1702-4E5D-BD74-CFE70EA32B92}.Debug|Win32.ActiveCfg = Debug|Win32
+		{167BAB46-1702-4E5D-BD74-CFE70EA32B92}.Debug|Win32.Build.0 = Debug|Win32
+		{167BAB46-1702-4E5D-BD74-CFE70EA32B92}.Debug|x64.ActiveCfg = Debug|Win32
+		{167BAB46-1702-4E5D-BD74-CFE70EA32B92}.Release|Win32.ActiveCfg = Release|Win32
+		{167BAB46-1702-4E5D-BD74-CFE70EA32B92}.Release|Win32.Build.0 = Release|Win32
+		{167BAB46-1702-4E5D-BD74-CFE70EA32B92}.Release|x64.ActiveCfg = Release|Win32
+		{DFD3B4AC-7891-4B5F-AE32-F8337C740038}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DFD3B4AC-7891-4B5F-AE32-F8337C740038}.Debug|Win32.Build.0 = Debug|Win32
+		{DFD3B4AC-7891-4B5F-AE32-F8337C740038}.Debug|x64.ActiveCfg = Debug|Win32
+		{DFD3B4AC-7891-4B5F-AE32-F8337C740038}.Release|Win32.ActiveCfg = Release|Win32
+		{DFD3B4AC-7891-4B5F-AE32-F8337C740038}.Release|Win32.Build.0 = Release|Win32
+		{DFD3B4AC-7891-4B5F-AE32-F8337C740038}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

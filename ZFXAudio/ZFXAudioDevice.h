@@ -49,9 +49,9 @@ typedef class ZFXAudioDevice *LPZFXAUDIODEVICE;
 
 extern "C"
 {
-	HRESULT CreateInputDevice(HINSTANCE hDLL, ZFXAudioDevice **pInterface);
+	HRESULT CreateAudioDevice(HINSTANCE hDLL, ZFXAudioDevice **pInterface);
 	typedef HRESULT(*CREATEAUDIODEVICE)(HINSTANCE hDLL, ZFXAudioDevice **pInterface);
 
-	HRESULT ReleaseInputDevice(ZFXAudioDevice **pInterface);
+	HRESULT ReleaseAudioDevice(ZFXAudioDevice **pInterface);
 	typedef HRESULT(*RELEASEAUDIODEVICE)(ZFXAudioDevice **pInterface);
 }
