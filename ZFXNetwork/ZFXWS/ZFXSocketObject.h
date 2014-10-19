@@ -5,7 +5,8 @@
 #pragma once
 
 #include <WinSock2.h>
-#include "ZFXWS.h"
+#include "ZFXQueue.h"
+#include <ZFXNetworkDevice.h>
 
 class ZFXSocketObject
 {
@@ -34,8 +35,8 @@ public:
    HRESULT  Receive(SOCKET sk);
 
    //queue manipulation functions
-   bool     IsPkgWaiting()    { return ( m_pInbox->GetCount() > 0 ); }
-   UINT     GetNextPktize()  { return ( m_pInbox->GetFrontSize()); }
+   bool     IsPktWaiting()    { return ( m_pInbox->GetCount() > 0 ); }
+   UINT     GetNextPktSize()  { return ( m_pInbox->GetFrontSize()); }
    HRESULT  GetNextPkt(ZFXPACKET*);
 
 private:

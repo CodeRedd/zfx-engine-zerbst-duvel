@@ -4,6 +4,7 @@
 #pragma once
 
 #include <Windows.h>
+#include <ZFX.h>
 
 #define WM_ZFXSERVER (WM_USER + 1)
 #define WM_ZFXCLIENT (WM_USER + 2)
@@ -51,7 +52,7 @@ public:
 
    //send and receive
    virtual HRESULT   SendToServer(const ZFXPACKET*) = 0;
-   virtual HRESULT   SendToClient(const ZFXPACKET*) = 0;
+   virtual HRESULT   SendToClients(const ZFXPACKET*) = 0;
 
    //information about inbox queue
    virtual bool      IsPktWaiting() = 0;
