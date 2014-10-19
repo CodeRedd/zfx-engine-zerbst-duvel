@@ -7,6 +7,8 @@
 #include "ZFXSocketObject.h"
 #include <ZFXNetworkDevice.h>
 
+BOOL WINAPI DllEntryPoint( HINSTANCE hDll, DWORD fdwReason, LPVOID lpvRserved );
+
 struct ZFXCLIENT
 {
    SOCKET skToClient;
@@ -33,6 +35,7 @@ public:
 
 private:
    ZFXSocketObject   *m_pSockObj;
+   WSAEVENT          m_Event;
    ZFXNETMODE        m_Mode;
    ZFXCLIENT         m_Clients[256];
    char              m_ClCount;

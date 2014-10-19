@@ -6,9 +6,6 @@
 #include <Windows.h>
 #include <ZFX.h>
 
-#define WM_ZFXSERVER (WM_USER + 1)
-#define WM_ZFXCLIENT (WM_USER + 2)
-
 enum ZFXNETMODE
 {
    NMD_SERVER = 0,

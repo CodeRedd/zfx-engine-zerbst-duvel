@@ -6,7 +6,7 @@
 #include <Ws2tcpip.h> //for Inet_Pton
 #include "ZFXSocketObject.h"
 
-int g_PktSize = sizeof(ZFXPACKET);
+extern int g_PktSize;
 
 ZFXSocketObject::ZFXSocketObject()
 {
