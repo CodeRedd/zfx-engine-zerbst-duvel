@@ -1,6 +1,8 @@
 //File: ZFXNetwork.h
 //Created by Stefan Zerbst and Oliver Duvel
 
+#pragma once
+
 #include "ZFXNetworkDevice.h"
 
 class ZFXNetwork
