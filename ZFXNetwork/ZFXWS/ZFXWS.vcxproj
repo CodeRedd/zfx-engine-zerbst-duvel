@@ -58,7 +58,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>C:\_Code Redd Games\Projects\ZFX\ZFXRenderer\Debug\ZFXRenderer.lib;C:\_Code Redd Games\Projects\ZFX\ZFXNetwork\Debug\ZFXNetwork.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\_Code Redd Games\Projects\ZFX\ZFXRenderer\Debug\ZFXRenderer.lib;C:\_Code Redd Games\Projects\ZFX\ZFXNetwork\Debug\ZFXNetwork.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
