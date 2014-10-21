@@ -24,12 +24,24 @@
     <ClInclude Include="ZFXMovementController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ZFXMCFree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ZFXMCFirstPerson.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZFXTimer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ZFXMovementController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ZFXMCFree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ZFXMCFirstPerson.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

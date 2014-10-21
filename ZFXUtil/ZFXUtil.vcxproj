@@ -77,10 +77,14 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ZFXMCFirstPerson.h" />
+    <ClInclude Include="ZFXMCFree.h" />
     <ClInclude Include="ZFXMovementController.h" />
     <ClInclude Include="ZFXTimer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ZFXMCFirstPerson.cpp" />
+    <ClCompile Include="ZFXMCFree.cpp" />
     <ClCompile Include="ZFXMovementController.cpp" />
     <ClCompile Include="ZFXTimer.cpp" />
   </ItemGroup>
