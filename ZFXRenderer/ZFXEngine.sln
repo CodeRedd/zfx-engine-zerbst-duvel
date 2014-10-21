@@ -27,6 +27,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXNetwork", "..\ZFXNetwork
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXWS", "..\ZFXNetwork\ZFXWS\ZFXWS.vcxproj", "{DFD3B4AC-7891-4B5F-AE32-F8337C740038}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZFXUtil", "..\ZFXUtil\ZFXUtil.vcxproj", "{5B3516DD-33C5-4945-98FD-E234D6DF7DB3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -109,6 +111,12 @@ Global
 		{DFD3B4AC-7891-4B5F-AE32-F8337C740038}.Release|Win32.ActiveCfg = Release|Win32
 		{DFD3B4AC-7891-4B5F-AE32-F8337C740038}.Release|Win32.Build.0 = Release|Win32
 		{DFD3B4AC-7891-4B5F-AE32-F8337C740038}.Release|x64.ActiveCfg = Release|Win32
+		{5B3516DD-33C5-4945-98FD-E234D6DF7DB3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5B3516DD-33C5-4945-98FD-E234D6DF7DB3}.Debug|Win32.Build.0 = Debug|Win32
+		{5B3516DD-33C5-4945-98FD-E234D6DF7DB3}.Debug|x64.ActiveCfg = Debug|Win32
+		{5B3516DD-33C5-4945-98FD-E234D6DF7DB3}.Release|Win32.ActiveCfg = Release|Win32
+		{5B3516DD-33C5-4945-98FD-E234D6DF7DB3}.Release|Win32.Build.0 = Release|Win32
+		{5B3516DD-33C5-4945-98FD-E234D6DF7DB3}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
