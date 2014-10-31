@@ -81,11 +81,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZFX3D_aabb.cpp" />
+    <ClCompile Include="ZFX3D_bsptree.cpp" />
     <ClCompile Include="ZFX3D_CPU.cpp" />
     <ClCompile Include="ZFX3D_matrix.cpp" />
     <ClCompile Include="ZFX3D_obb.cpp" />
     <ClCompile Include="ZFX3D_plane.cpp" />
     <ClCompile Include="ZFX3D_polygon.cpp" />
+    <ClCompile Include="ZFX3D_polylist.cpp" />
     <ClCompile Include="ZFX3D_quat.cpp" />
     <ClCompile Include="ZFX3D_ray.cpp" />
     <ClCompile Include="ZFX3D_vector.cpp" />

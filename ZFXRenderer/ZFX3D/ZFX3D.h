@@ -308,3 +308,23 @@ public:
 
 	ZFXVector Rotate(const ZFXVector &v);
 };
+
+//Polygon List - Half stack
+class ZFXPolyList
+{
+public:
+   ZFXPolyList();
+   ~ZFXPolyList();
+
+   bool           AddPolygon(const ZFXPolygon&);
+   void           Reset();
+   ZFXPolygon*    GetPolylist() { return m_pPolys; }
+   unsigned int   GetNum()      { return m_Num; }
+
+private:
+   ZFXPolygon     *m_pPolys;
+   unsigned int   m_Num;
+   unsigned int   m_Max;
+
+   bool           CheckMem();
+};
