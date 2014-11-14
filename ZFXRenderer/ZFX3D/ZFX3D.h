@@ -328,3 +328,40 @@ private:
 
    bool           CheckMem();
 };
+
+//Binary Space Partitioning Tree -- leafy variety
+class ZFXBSPTree
+{
+public:
+   ZFXBSPTree();
+   virtual ~ZFXBSPTree();
+
+   void     BuildTree(const ZFXPolygon*, UINT);
+   void     TraverseBtF(ZFXPolyList*, ZFXVector, const ZFXPlane*);
+   void     TraverseFtB(ZFXPolyList*, ZFXVector, const ZFXPlane*);
+   
+   ZFXAABB  GetAABB() { return m_AABB;}
+   
+   bool LineOfSight(const ZFXVector&, const ZFXVector&);
+
+   bool TestCollision(const ZFXRay&, float, float*, ZFXVector*);
+private:
+   ZFXAABB        m_AABB;     // bounding box
+   ZFXPlane       m_Plane;    // splitting plane
+   ZFXBSPTree     *m_pBack;   // backlist
+   ZFXBSPTree     *m_pFront;  // frontlist
+   ZFXBSPTree     *m_pRoot;   // root node
+   ZFXBSPTree     *m_pParent; // parent node
+   ZFXPolygon     *m_pPolys;  // if leaf node
+   UINT           m_NumPolys; // if leaf node
+
+   static UINT m_sNum;        // final poly count
+
+   void CreateChildren();
+   bool FindBestSplitter();
+   void AddPolygon(const ZFXPolygon&);
+   void CalcBoundingBox(const ZFXPolygon*, UINT);
+   void SetRelationship(ZFXBSPTree *R, ZFXBSPTree *D) { m_pParent = D; m_pRoot = R;}
+
+   bool IsLeaf() { return (m_pFront == NULL && m_pBack == NULL ); }
+};
