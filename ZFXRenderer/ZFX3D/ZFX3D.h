@@ -14,13 +14,24 @@ const double ZFX2PI = 6.2831853;
 const float  ZFXG = -32.174f; // ft/s^2
 const float  ZFXEPSILON = 0.00001f;
 
-//definitions
-#define ZFXFRONT	0
-#define ZFXBACK		1
-#define ZFXPLANAR	2
-#define ZFXCLIPPED  3
-#define ZFXCULLED   4
-#define ZFXVISIBLE  5
+//culling / clipping values
+#define ZFXFRONT	   0
+#define ZFXBACK	   1
+#define ZFXPLANAR	   2
+#define ZFXCLIPPED   3
+#define ZFXCULLED    4
+#define ZFXVISIBLE   5
+
+//octree quadrants
+#define UP_NE  0
+#define UP_NW  1
+#define UP_SE  2
+#define UP_SW  3
+#define LW_NE  4
+#define LW_NW  5
+#define LW_SE  6
+#define LW_SW  7
+#define POLYS_PER_LEAF 10 //cutoff point for defining new sub-octrees
 
 //Utility method
 float _fabs(float f);
@@ -329,7 +340,7 @@ private:
    bool           CheckMem();
 };
 
-//Binary Space Partitioning Tree -- leafy variety
+//Binary Space Partitioning Tree -- leafy variety. Optimized for polygon enumeration, not collision detection
 class ZFXBSPTree
 {
 public:
@@ -364,4 +375,39 @@ private:
    void SetRelationship(ZFXBSPTree *R, ZFXBSPTree *D) { m_pParent = D; m_pRoot = R;}
 
    bool IsLeaf() { return (m_pFront == NULL && m_pBack == NULL ); }
+};
+
+//Octree -- optimized for collision detection, not polygon enumeration
+class ZFXOctree
+{
+public:
+   ZFXOctree();
+   virtual ~ZFXOctree();
+
+   void     BuildTree( const ZFXPolygon*, UINT );
+   void     Traverse( ZFXPolyList*, ZFXPolyList*, const ZFXPlane* );
+   ZFXAABB  GetAABB() { return m_AABB; }
+
+   bool     GetFloor( const ZFXVector&, float*, ZFXPlane* );
+   bool     TestCollision( const ZFXAABB&, ZFXPlane* );
+   bool     TestCollision( const ZFXRay&, float, float* );
+
+private:
+   ZFXAABB     m_AABB;        // bounding box
+   ZFXPolygon  *m_pPolys;     // if leaf, list of polygons
+   UINT        m_NumPolys;    // if leaf, size of polygon list
+   ZFXOctree   *m_pChild[8];  // 8 children if not a leaf
+   ZFXOctree   *m_pRoot;      // root node
+   ZFXOctree   *m_pParent;    // parent node
+   int         m_Pos;         // position relative to parent node (upper NE, lower SW, etc)
+
+   void  CalcBoundingBox( const ZFXPolygon*, UINT );
+   void  InitChildObject( int ChildID, ZFXOctree *pP );
+   void  ChopListToMe( ZFXPolygon*, UINT );
+   void  CreateChildren( ZFXOctree *pRoot );
+   void  GetAABBAsPolygons( ZFXPolyList* );
+   bool  IntersectsDownwardRay( const ZFXVector&, float );
+
+   bool  IsLeaf() { return m_pChild[0] == NULL; }
+   void  SetBoundingBox( const ZFXAABB &Aabb ) { memcpy( &m_AABB, &Aabb, sizeof( ZFXAABB ) ); }
 };

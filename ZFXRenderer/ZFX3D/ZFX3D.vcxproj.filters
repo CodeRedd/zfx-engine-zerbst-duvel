@@ -56,5 +56,8 @@
     <ClCompile Include="ZFX3D_polylist.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ZFX3D_octree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
